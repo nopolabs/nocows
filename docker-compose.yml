@@ -1,0 +1,14 @@
+version: "3.3"
+
+services:
+
+  nocows:
+    image: openjdk:12
+    restart: always
+    command: java -jar /app/nocows-0.0.1-SNAPSHOT.jar
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./build/libs/nocows-0.0.1-SNAPSHOT.jar:/app/nocows-0.0.1-SNAPSHOT.jar
+    environment:
+      spring_profiles_active: docker
