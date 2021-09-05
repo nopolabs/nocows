@@ -22,12 +22,24 @@ function init() {
         } while(true);
     }
 
-    function check(hive, word) {
-        fetch("/api/token")
+    function getToken() {
+        return fetch("/api/token")
             .then(response => {
                 if (!response.ok) { throw Error(response.statusText);}
                 return response.text();
-            })
+            });
+    }
+
+    function getHeaderToken() {
+        return fetch("/api/headerToken")
+            .then(response => {
+                if (!response.ok) { throw Error(response.statusText);}
+                return response.headers.get("nocows-token");
+            });
+    }
+
+    function check(hive, word) {
+        getToken()
             .then(token => {
                 proof(token + ":" + word)
                     .then(proof => {

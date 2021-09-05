@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
 
 @RestController
@@ -26,6 +27,11 @@ public class ApiController {
     long token() {
 
         return Instant.now().getEpochSecond();
+    }
+
+    @GetMapping("/headerToken")
+    void token(HttpServletResponse response) {
+        response.addHeader("nocows-token", String.valueOf(token()));
     }
 
     @GetMapping("/{hive}")
