@@ -23,28 +23,29 @@ function init() {
     }
 
     function check(hive, word) {
-        proof(word)
-            .then(proof => {
-                const params = new URLSearchParams({ proof: proof });
-                const url = "/api/check/" + hive + "/" + word + "?" + params;
-                document.getElementById('url').innerText = url;
-                fetch(url)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw Error(response.statusText);
-                        }
-                        return response.json();
-                    })
-                    .then((json) => {
-                        console.log(json);
-                        document.getElementById('result').innerText = JSON.stringify(json);
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    });
+        fetch("/api/token")
+            .then(response => {
+                if (!response.ok) { throw Error(response.statusText);}
+                return response.text();
             })
-            .catch(error => {
-                console.log(error);
+            .then(token => {
+                proof(token + ":" + word)
+                    .then(proof => {
+                        const params = new URLSearchParams({ proof: proof });
+                        const url = "/api/" + hive + "/" + word + "?" + params;
+                        document.getElementById('url').innerText = url;
+                        fetch(url)
+                            .then(response => {
+                                if (!response.ok) { throw Error(response.statusText);}
+                                return response.json();
+                            })
+                            .then((json) => {
+                                console.log(json);
+                                document.getElementById('result').innerText = JSON.stringify(json);
+                            })
+                            .catch(error => { console.log(error); });
+                    })
+                    .catch(error => { console.log(error); });
             });
     }
 

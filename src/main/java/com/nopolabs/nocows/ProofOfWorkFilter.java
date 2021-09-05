@@ -12,9 +12,8 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 
-@WebFilter("/api/*")
+@WebFilter("/api/filter/*")
 public class ProofOfWorkFilter implements Filter {
 
     private final ProofOfWork proofOfWork;
@@ -34,14 +33,10 @@ public class ProofOfWorkFilter implements Filter {
 
         String proof = req.getParameter("proof");
 
-        try {
-            if (proofOfWork.validate(proof)) {
-                chain.doFilter(request, response);
-            } else {
-                rsp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            }
-        } catch (NoSuchAlgorithmException e) {
-            rsp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        if (proofOfWork.validate(proof)) {
+            chain.doFilter(request, response);
+        } else {
+            rsp.sendError(HttpServletResponse.SC_FORBIDDEN);
         }
     }
 }
