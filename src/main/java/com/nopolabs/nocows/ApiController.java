@@ -60,7 +60,7 @@ public class ApiController {
             throw new IllegalArgumentException();
         }
 
-        checkProof(request, proof, word);
+        checkProof(request, proof, hive + ":" + word);
 
         return bee.get(hive, word);
     }
@@ -72,7 +72,7 @@ public class ApiController {
             @PathVariable String word,
             @RequestParam String proof) {
 
-        checkProof(request, proof, word);
+        checkProof(request, proof, hive + ":" + word);
 
         return bee.get(hive, word);
     }
@@ -137,31 +137,31 @@ public class ApiController {
         return request.getRemoteAddr();
     }
 
-    private void checkProof(HttpServletRequest request, String proof, String data) {
+    private void checkProof(HttpServletRequest request, String proof, String checkData) {
         if (proof == null) {
             throw new IllegalArgumentException();
         }
 
         // nonce:hash(ipAddress + salt):epochSecond:data
-        String[] parts = proof.split(":");
+        String[] parts = proof.split(":", 4);
         if (parts.length != 4) {
             throw new IllegalArgumentException();
         }
+        String hash = parts[1];
+        long epochSecond = Long.parseLong(parts[2]);
+        String data = parts[3];
 
-        long now = epochSecond();
-        long then = Long.parseLong(parts[2]);
-        long elapsed = now - then;
-        LOG.info("elapsed = " + elapsed + " " + now + " " + then);
+        long elapsed = epochSecond() - epochSecond;
         if (elapsed != 0) { // less than one second
             throw new IllegalArgumentException();
         }
 
-        if (!data.equals(parts[3])) {
+        if (!data.equals(checkData)) {
             throw new IllegalArgumentException();
         }
 
         String ipAddress = getClientIpAddress(request);
-        if (!sha256(salt(ipAddress)).equals(parts[1])) {
+        if (!hash.equals(sha256(salt(ipAddress)))) {
             throw new IllegalArgumentException();
         }
     }

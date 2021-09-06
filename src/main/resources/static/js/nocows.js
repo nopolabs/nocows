@@ -38,27 +38,23 @@ function init() {
             });
     }
 
-    function check(hive, word, token) {
-        proof(token + ":" + word)
-            .then(proof => {
-                const params = new URLSearchParams({ proof: proof });
-                const url = "/api/" + hive + "/" + word + "?" + params;
-                document.getElementById('url').innerText = url;
-                fetch(url)
-                    .then(response => {
-                        if (!response.ok) { throw Error(response.statusText);}
-                        return response.json();
-                    })
-                    .then((json) => {
-                        console.log(json);
-                        document.getElementById('result').innerText = JSON.stringify(json);
-                    })
-                    .catch(error => {
-                        console.log(error);
-                        document.getElementById('result').innerText = error;
-                    });
+    function check(hive, word, proof) {
+        const params = new URLSearchParams({ proof: proof });
+        const url = "/api/" + hive + "/" + word + "?" + params;
+        document.getElementById('url').innerText = url;
+        fetch(url)
+            .then(response => {
+                if (!response.ok) { throw Error(response.statusText);}
+                return response.json();
             })
-            .catch(error => { console.log(error); });
+            .then((json) => {
+                console.log(json);
+                document.getElementById('result').innerText = JSON.stringify(json);
+            })
+            .catch(error => {
+                console.log(error);
+                document.getElementById('result').innerText = error;
+            });
     }
 
     function submit(token) {
@@ -66,7 +62,10 @@ function init() {
         const word = document.getElementById('word').value;
         document.getElementById('url').innerText = "";
         document.getElementById('result').innerText = "";
-        check(hive, word, token);
+        proof(token + ":" + hive + ":" + word)
+            .then(proof => {
+                check(hive, word, proof);
+            });
     }
 
     function onSubmit() {
