@@ -83,7 +83,7 @@ function init() {
     }
 
     function submit(token) {
-        const hive = document.getElementById('hive').innerText;
+        const hive = document.getElementById('hive').value;
         const word = document.getElementById('word').value;
         proof(token + ":" + hive + ":" + word)
             .then(proof => {
@@ -115,7 +115,7 @@ function init() {
     function onSolution() {
         getToken()
             .then(token => {
-                const hive = document.getElementById('hive').innerText;
+                const hive = document.getElementById('hive').value;
                 proof(token + ":" + hive)
                     .then(proof => {
                         solve(hive, proof);
@@ -123,10 +123,36 @@ function init() {
             })
     }
 
+    function letterClick(event) {
+        const letter = event.target.value;
+        const word = document.getElementById('word').value;
+        document.getElementById('word').value = word + letter;
+    }
+
+    function showHive() {
+        const hive = document.getElementById('hive').value;
+        document.getElementById('letter-0').value = hive.charAt(0);
+        document.getElementById('letter-1').value = hive.charAt(1);
+        document.getElementById('letter-2').value = hive.charAt(2);
+        document.getElementById('letter-3').value = hive.charAt(3);
+        document.getElementById('letter-4').value = hive.charAt(4);
+        document.getElementById('letter-5').value = hive.charAt(5);
+        document.getElementById('letter-6').value = hive.charAt(6);
+    }
+
+    showHive();
+
     document.getElementById('submit-button').onclick = onSubmit;
     document.getElementById('delayed-submit-button').onclick = onDelayedSubmit;
     document.getElementById('solution-button').onclick = onSolution;
     document.getElementById('form').addEventListener('submit', formSubmit);
+    document.getElementById('letter-0').onclick = letterClick;
+    document.getElementById('letter-1').onclick = letterClick;
+    document.getElementById('letter-2').onclick = letterClick;
+    document.getElementById('letter-3').onclick = letterClick;
+    document.getElementById('letter-4').onclick = letterClick;
+    document.getElementById('letter-5').onclick = letterClick;
+    document.getElementById('letter-6').onclick = letterClick;
 }
 
 document.addEventListener("DOMContentLoaded", init);

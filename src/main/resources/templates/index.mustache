@@ -7,18 +7,83 @@
           crossorigin="anonymous">
 
     <script src="js/nocows.js"></script>
+    <style>
+        .letter {}
+    </style>
 </head>
 <body>
 <div class="card">
     <div class="card-body">
         <h2 class="card-title">No Cows</h2>
-        <div>Hive: <span id="hive">{{ hive }}</span></div>
+
+<!--        <form>-->
+<!--            <div class="row mb-3">-->
+<!--                <label for="inputEmail3" class="col-sm-2 col-form-label">Email</label>-->
+<!--                <div class="col-sm-10">-->
+<!--                    <input type="email" class="form-control" id="inputEmail3">-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="row mb-3">-->
+<!--                <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>-->
+<!--                <div class="col-sm-10">-->
+<!--                    <input type="password" class="form-control" id="inputPassword3">-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <fieldset class="row mb-3">-->
+<!--                <legend class="col-form-label col-sm-2 pt-0">Radios</legend>-->
+<!--                <div class="col-sm-10">-->
+<!--                    <div class="form-check">-->
+<!--                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="option1" checked>-->
+<!--                        <label class="form-check-label" for="gridRadios1">-->
+<!--                            First radio-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                    <div class="form-check">-->
+<!--                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="option2">-->
+<!--                        <label class="form-check-label" for="gridRadios2">-->
+<!--                            Second radio-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                    <div class="form-check disabled">-->
+<!--                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios3" value="option3" disabled>-->
+<!--                        <label class="form-check-label" for="gridRadios3">-->
+<!--                            Third disabled radio-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </fieldset>-->
+<!--            <div class="row mb-3">-->
+<!--                <div class="col-sm-10 offset-sm-2">-->
+<!--                    <div class="form-check">-->
+<!--                        <input class="form-check-input" type="checkbox" id="gridCheck1">-->
+<!--                        <label class="form-check-label" for="gridCheck1">-->
+<!--                            Example checkbox-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <button type="submit" class="btn btn-primary">Sign in</button>-->
+<!--        </form>-->
+
         <form id="form">
-            <div class="form-group">
-                <label for="word">Word:</label>
-                <input type="text" id="word" name="word" value="" class="form-control"/>
+            <div class="row mb-2">
+                <span class="col-sm-2">Hive</span>
+                <input type="hidden" id="hive" value="{{ hive }}"/>
+                <input type="button" class="letter col-sm-1" id="letter-0" value=""/>
+                <input type="button" class="letter col-sm-1" id="letter-1" value=""/>
+                <input type="button" class="letter col-sm-1" id="letter-2" value=""/>
+                <input type="button" class="letter col-sm-1" id="letter-3" value=""/>
+                <input type="button" class="letter col-sm-1" id="letter-4" value=""/>
+                <input type="button" class="letter col-sm-1" id="letter-5" value=""/>
+                <input type="button" class="letter col-sm-1" id="letter-6" value=""/>
             </div>
-            <div class="form-group">
+            <div class="row mb-2">
+                <label for="word" class="col-sm-2">Word</label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" id="word" name="word" value=""/>
+                </div>
+            </div>
+            <div class="row mb-2">
                 <input type="button" id="submit-button" value="Submit"/>
                 <input type="button" id="delayed-submit-button" value="Delayed Submit"/>
                 <input type="button" id="solution-button" value="Solution"/>
