@@ -40,9 +40,19 @@ function init() {
             });
     }
 
-    function solve(hive, proof) {
-        const params = new URLSearchParams({ proof: proof });
-        const url = "/api/cows/" + hive + "?" + params;
+    function score(words) {
+        return [...words].reduce(function(score, word){
+            if (word.length < 4) {
+                return score;
+            }
+            if (word.length === 4) {
+                return score + 1;
+            }
+            return score + word.length;
+        }, 0)
+    }
+
+    function fetchUrl(url) {
         fetch(url)
             .then(response => {
                 if (!response.ok) { throw Error(response.statusText);}
@@ -51,6 +61,7 @@ function init() {
             .then((json) => {
                 console.log(json);
                 json.words.forEach(word => spelled.add(word));
+                document.getElementById('score').innerText = score(spelled);
                 document.getElementById('words').innerText = Array.from(spelled).join(" ");
                 document.getElementById('word').value = "";
             })
@@ -59,23 +70,16 @@ function init() {
             });
     }
 
+    function solve(hive, proof) {
+        const params = new URLSearchParams({ proof: proof });
+        const url = "/api/cows/" + hive + "?" + params;
+        fetchUrl(url);
+    }
+
     function check(hive, word, proof) {
         const params = new URLSearchParams({ proof: proof });
         const url = "/api/cows/" + hive + "/" + word + "?" + params;
-        fetch(url)
-            .then(response => {
-                if (!response.ok) { throw Error(response.statusText);}
-                return response.json();
-            })
-            .then((json) => {
-                console.log(json);
-                json.words.forEach(word => spelled.add(word));
-                document.getElementById('words').innerText = Array.from(spelled).join(" ");
-                document.getElementById('word').value = "";
-            })
-            .catch(error => {
-                console.log(error);
-            });
+        fetchUrl(url);
     }
 
     function submit(token) {
