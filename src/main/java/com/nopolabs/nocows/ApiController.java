@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 
 @RestController
@@ -71,7 +74,34 @@ public class ApiController {
     }
 
     private String getToken(HttpServletRequest request) {
-        return getClientIpAddress(request) + ":" + epochSecond();
+        String ipAddress = getClientIpAddress(request);
+
+        // token = hash(ipAddress + salt):epochSecond
+        // this makes the token specific to the requester and a moment in time
+        return sha256(salt(ipAddress)) + ":" + epochSecond();
+    }
+
+    private String salt(String data) {
+        return data + "SeCrEt sAlT";
+    }
+
+    private String sha256(String data) {
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
+            return hex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            return data; // :P
+        }
+    }
+
+    private String hex(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte aByte : bytes) {
+            result.append(String.format("%02X", aByte));
+        }
+        return result.toString();
     }
 
     private long epochSecond() {
@@ -108,14 +138,14 @@ public class ApiController {
             throw new IllegalArgumentException();
         }
 
-        // nonce:ipAddress:epochSecond:data
+        // nonce:hash(ipAddress + salt):epochSecond:data
         String[] parts = proof.split(":");
         if (parts.length != 4) {
             throw new IllegalArgumentException();
         }
 
         String ipAddress = getClientIpAddress(request);
-        if (!ipAddress.equals(parts[1])) {
+        if (!sha256(salt(ipAddress)).equals(parts[1])) {
             throw new IllegalArgumentException();
         }
 
