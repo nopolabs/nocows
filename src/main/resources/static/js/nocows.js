@@ -2,6 +2,8 @@ function init() {
 
     const crypto = window.crypto.subtle;
 
+    var spelled = new Set();
+
     // SHA-256 hash of str, returns Uint8Array
     function sha256(str) {
         var buffer = new TextEncoder("utf-8").encode(str)
@@ -10,7 +12,7 @@ function init() {
 
     async function proof(data) {
         var nonce = 0;
-        do {
+        while(true) {
             var candidate = nonce + ":" + data;
             var hash = await sha256(candidate);
             var view = new DataView(hash);
@@ -19,7 +21,7 @@ function init() {
                 return candidate;
             }
             nonce++
-        } while(true);
+        }
     }
 
     function getToken() {
@@ -38,10 +40,9 @@ function init() {
             });
     }
 
-    function check(hive, word, proof) {
+    function solve(hive, proof) {
         const params = new URLSearchParams({ proof: proof });
-        const url = "/api/" + hive + "/" + word + "?" + params;
-        document.getElementById('url').innerText = url;
+        const url = "/api/cows/" + hive + "?" + params;
         fetch(url)
             .then(response => {
                 if (!response.ok) { throw Error(response.statusText);}
@@ -49,19 +50,37 @@ function init() {
             })
             .then((json) => {
                 console.log(json);
-                document.getElementById('result').innerText = JSON.stringify(json);
+                json.words.forEach(word => spelled.add(word));
+                document.getElementById('words').innerText = Array.from(spelled).join(" ");
+                document.getElementById('word').value = "";
             })
             .catch(error => {
                 console.log(error);
-                document.getElementById('result').innerText = error;
+            });
+    }
+
+    function check(hive, word, proof) {
+        const params = new URLSearchParams({ proof: proof });
+        const url = "/api/cows/" + hive + "/" + word + "?" + params;
+        fetch(url)
+            .then(response => {
+                if (!response.ok) { throw Error(response.statusText);}
+                return response.json();
+            })
+            .then((json) => {
+                console.log(json);
+                json.words.forEach(word => spelled.add(word));
+                document.getElementById('words').innerText = Array.from(spelled).join(" ");
+                document.getElementById('word').value = "";
+            })
+            .catch(error => {
+                console.log(error);
             });
     }
 
     function submit(token) {
         const hive = document.getElementById('hive').innerText;
         const word = document.getElementById('word').value;
-        document.getElementById('url').innerText = "";
-        document.getElementById('result').innerText = "";
         proof(token + ":" + hive + ":" + word)
             .then(proof => {
                 check(hive, word, proof);
@@ -69,6 +88,7 @@ function init() {
     }
 
     function onSubmit() {
+        console.log('onSubmit');
         getToken()
             .then(token => {
                 submit(token);
@@ -82,8 +102,27 @@ function init() {
             });
     }
 
+    function formSubmit(event) {
+        console.log('formSubmit');
+        event.preventDefault();
+        onSubmit();
+    }
+
+    function onSolution() {
+        getToken()
+            .then(token => {
+                const hive = document.getElementById('hive').innerText;
+                proof(token + ":" + hive)
+                    .then(proof => {
+                        solve(hive, proof);
+                    })
+            })
+    }
+
     document.getElementById('submit-button').onclick = onSubmit;
     document.getElementById('delayed-submit-button').onclick = onDelayedSubmit;
+    document.getElementById('solution-button').onclick = onSolution;
+    document.getElementById('form').addEventListener('submit', formSubmit);
 }
 
 document.addEventListener("DOMContentLoaded", init);

@@ -1,7 +1,5 @@
 package com.nopolabs.nocows;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +16,6 @@ import java.time.Instant;
 @RestController
 @RequestMapping(value = "/api")
 public class ApiController {
-
-    private static Logger LOG = LoggerFactory.getLogger(ApiController.class);
 
     private final Bee bee;
     private final ProofOfWork proofOfWork;
@@ -43,13 +39,18 @@ public class ApiController {
         response.addHeader("nocows-token", getToken(request));
     }
 
-    @GetMapping("/{hive}")
-    Cows hive(@PathVariable String hive) {
+    @GetMapping("/cows/{hive}")
+    Cows hive(
+            HttpServletRequest request,
+            @PathVariable String hive,
+            @RequestParam String proof) {
+
+        checkProof(request, proof, hive);
 
         return bee.get(hive);
     }
 
-    @GetMapping("/{hive}/{word}")
+    @GetMapping("/cows/{hive}/{word}")
     Cows hive(
             HttpServletRequest request,
             @PathVariable String hive,
@@ -90,9 +91,8 @@ public class ApiController {
     }
 
     private String sha256(String data) {
-        MessageDigest digest = null;
         try {
-            digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
             return hex(hash);
         } catch (NoSuchAlgorithmException e) {

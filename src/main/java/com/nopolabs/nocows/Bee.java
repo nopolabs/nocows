@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 @Component
 public class Bee {
 
-    private final Logger logger = LoggerFactory.getLogger(Bee.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Bee.class);
 
     private final List<String> words;
     private final Node trie;
@@ -20,7 +20,7 @@ public class Bee {
     public Bee(@Value("${words.resource}") String wordsResource) {
         words = Utils.getWordSource(wordsResource).collect(Collectors.toList());
         trie = Utils.getTrie(words);
-        logger.info("Loaded {} words.", trie.getCount());
+        LOG.info("Loaded {} words.", trie.getCount());
     }
 
     public Cows get(String hive) {
