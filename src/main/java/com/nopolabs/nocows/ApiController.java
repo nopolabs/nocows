@@ -1,5 +1,7 @@
 package com.nopolabs.nocows;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +18,8 @@ import java.time.Instant;
 @RestController
 @RequestMapping(value = "/api")
 public class ApiController {
+
+    private static Logger LOG = LoggerFactory.getLogger(ApiController.class);
 
     private final Bee bee;
     private final ProofOfWork proofOfWork;
@@ -144,17 +148,20 @@ public class ApiController {
             throw new IllegalArgumentException();
         }
 
-        String ipAddress = getClientIpAddress(request);
-        if (!sha256(salt(ipAddress)).equals(parts[1])) {
-            throw new IllegalArgumentException();
-        }
-
-        long elapsed = epochSecond() - Long.parseLong(parts[2]);
-        if (elapsed < 0 || elapsed > 1) {
+        long now = epochSecond();
+        long then = Long.parseLong(parts[2]);
+        long elapsed = now - then;
+        LOG.info("elapsed = " + elapsed + " " + now + " " + then);
+        if (elapsed != 0) { // less than one second
             throw new IllegalArgumentException();
         }
 
         if (!data.equals(parts[3])) {
+            throw new IllegalArgumentException();
+        }
+
+        String ipAddress = getClientIpAddress(request);
+        if (!sha256(salt(ipAddress)).equals(parts[1])) {
             throw new IllegalArgumentException();
         }
     }

@@ -38,36 +38,53 @@ function init() {
             });
     }
 
-    function check(hive, word) {
-        getToken()
-            .then(token => {
-                proof(token + ":" + word)
-                    .then(proof => {
-                        const params = new URLSearchParams({ proof: proof });
-                        const url = "/api/" + hive + "/" + word + "?" + params;
-                        document.getElementById('url').innerText = url;
-                        fetch(url)
-                            .then(response => {
-                                if (!response.ok) { throw Error(response.statusText);}
-                                return response.json();
-                            })
-                            .then((json) => {
-                                console.log(json);
-                                document.getElementById('result').innerText = JSON.stringify(json);
-                            })
-                            .catch(error => { console.log(error); });
+    function check(hive, word, token) {
+        proof(token + ":" + word)
+            .then(proof => {
+                const params = new URLSearchParams({ proof: proof });
+                const url = "/api/" + hive + "/" + word + "?" + params;
+                document.getElementById('url').innerText = url;
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) { throw Error(response.statusText);}
+                        return response.json();
                     })
-                    .catch(error => { console.log(error); });
-            });
+                    .then((json) => {
+                        console.log(json);
+                        document.getElementById('result').innerText = JSON.stringify(json);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        document.getElementById('result').innerText = error;
+                    });
+            })
+            .catch(error => { console.log(error); });
     }
 
-    document.getElementById('submit-button').onclick = function() {
+    function submit(token) {
         const hive = document.getElementById('hive').innerText;
         const word = document.getElementById('word').value;
         document.getElementById('url').innerText = "";
         document.getElementById('result').innerText = "";
-        check(hive, word);
+        check(hive, word, token);
     }
+
+    function onSubmit() {
+        getToken()
+            .then(token => {
+                submit(token);
+            });
+    }
+
+    function onDelayedSubmit() {
+        getToken()
+            .then(token => {
+                setTimeout(() => submit(token), 1000);
+            });
+    }
+
+    document.getElementById('submit-button').onclick = onSubmit;
+    document.getElementById('delayed-submit-button').onclick = onDelayedSubmit;
 }
 
 document.addEventListener("DOMContentLoaded", init);
