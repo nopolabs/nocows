@@ -157,7 +157,7 @@ public class ApiController {
         String data = parts[3];
 
         long elapsed = epochSecond() - epochSecond;
-        if (elapsed != 0) { // less than one second
+        if (elapsed < 0 || elapsed >= 2) { // rejects greater than two seconds
             LOG.info("elaspsed = " + elapsed);
             throw new IllegalArgumentException();
         }
