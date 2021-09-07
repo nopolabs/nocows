@@ -40,6 +40,19 @@ function init() {
             });
     }
 
+    function isPangram(word) {
+        if (word.length < 7) {
+            return false;
+        }
+        const hive = document.getElementById('hive').value;
+        for (var i = 0; i < hive.length; i++) {
+            if (!word.includes(hive.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     function score(words) {
         return [...words].reduce(function(score, word){
             if (word.length < 4) {
@@ -47,6 +60,9 @@ function init() {
             }
             if (word.length === 4) {
                 return score + 1;
+            }
+            if (isPangram(word)) {
+                return score + word.length + 7;
             }
             return score + word.length;
         }, 0)
