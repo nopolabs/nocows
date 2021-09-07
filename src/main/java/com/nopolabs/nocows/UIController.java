@@ -1,5 +1,7 @@
 package com.nopolabs.nocows;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,11 +11,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/")
 public class UIController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(UIController.class);
 
     private final Bee bee;
     private final Random random;
@@ -34,16 +37,19 @@ public class UIController {
     }
 
     private String pickHive() {
-        String hive = "";
-        while(hive.length() < 7) {
-            hive = pickVowels(2);
+        while(true) {
+            String hive = pickVowels(2);
             hive = hive + pickLetters(5, hive);
-            if ((hive.contains("q") && !hive.contains("u"))
-                    || bee.get(hive).getWords().size() < 30) {
-                hive = "";
+            hive = shuffle(hive);
+            Cows cows = bee.get(hive);
+            if (hive.contains("q") && !hive.contains("u")) {
+                continue;
+            }
+            if (cows.getWords().size() >= 20) {
+                LOG.info("hive = " + hive + " " + cows.getWords().size() + " words");
+                return hive;
             }
         }
-        return shuffle(hive);
     }
 
     public static String shuffle(String string) {
