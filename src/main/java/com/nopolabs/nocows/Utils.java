@@ -25,7 +25,9 @@ public class Utils {
     public static Stream<String> getWordSource(String... names) {
         return Arrays.stream(names)
                 .flatMap(Utils::resourceLines)
-                .filter(word -> word.length() >= 4)
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .filter(s -> s.matches("[a-z]{4,}"))
                 .sorted()
                 .distinct();
     }
