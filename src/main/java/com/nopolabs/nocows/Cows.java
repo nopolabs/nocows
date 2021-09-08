@@ -29,7 +29,7 @@ public class Cows {
         return words.stream()
                 .filter(word -> word.length() >= 7)
                 .anyMatch(word -> {
-                    for (String letter : word.split("")) {
+                    for (String letter : hive.split("")) {
                         if (!word.contains(letter)) {
                             return false;
                         }
