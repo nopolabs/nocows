@@ -45,10 +45,17 @@ public class UIController {
             if (hive.contains("q") && !hive.contains("u")) {
                 continue;
             }
-            if (cows.getWords().size() >= 20 && cows.hasPangram()) {
-                LOG.info("hive = " + hive + " " + cows.getWords().size() + " words");
-                return hive;
+            if (cows.getWords().size() < 20) {
+                continue;
             }
+            if (!cows.hasPangram()) {
+                continue;
+            }
+            if (!cows.eachLetterHasAWord()) {
+                continue;
+            }
+
+            return hive;
         }
     }
 

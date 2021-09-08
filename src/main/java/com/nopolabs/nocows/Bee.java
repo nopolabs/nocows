@@ -27,7 +27,6 @@ public class Bee {
         List<String> found = words.stream()
                 .filter(word -> inHive(hive, word))
                 .collect(Collectors.toList());
-        LOG.info("found " + found.size() + " words");
         return new Cows(hive, found);
     }
 

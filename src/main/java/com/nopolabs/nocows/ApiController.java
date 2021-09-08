@@ -52,7 +52,7 @@ public class ApiController {
 
         checkProof(request, proof, hive);
 
-        return bee.get(hive);
+        return bee.get(hive.toLowerCase());
     }
 
     @GetMapping("/cows/{hive}/{word}")
@@ -68,7 +68,7 @@ public class ApiController {
 
         checkProof(request, proof, hive + ":" + word);
 
-        return bee.get(hive, word);
+        return bee.get(hive.toLowerCase(), word.toLowerCase());
     }
 
     @GetMapping("/filter/{hive}/{word}")

@@ -75,7 +75,10 @@ function init() {
                 return response.json();
             })
             .then((json) => {
-                json.words.forEach(word => spelled.add(word));
+                json.words.forEach(word => {
+                    const capitalizedWord = word[0].toUpperCase() + word.substring(1).toLowerCase();
+                    spelled.add(capitalizedWord)
+                });
                 document.getElementById('score').innerText = score(spelled);
                 document.getElementById('words').innerText = Array.from(spelled).join(" ");
                 document.getElementById('word').value = "";
@@ -104,7 +107,7 @@ function init() {
 
     function check(hive, word, proof) {
         const params = new URLSearchParams({ proof: proof });
-        const url = "/api/cows/" + hive + "/" + word + "?" + params;
+        const url = "/api/cows/" + hive + "/" + word.toLowerCase() + "?" + params;
         fetchUrl(url);
     }
 
@@ -128,18 +131,18 @@ function init() {
     function letterClick(event) {
         const letter = event.target.value;
         const word = document.getElementById('word').value;
-        document.getElementById('word').value = word + letter;
+        document.getElementById('word').value = word + letter.toLowerCase();
     }
 
     function showHive() {
         const hive = document.getElementById('hive').value;
-        document.getElementById('letter-0').value = hive.charAt(0);
-        document.getElementById('letter-1').value = hive.charAt(1);
-        document.getElementById('letter-2').value = hive.charAt(2);
-        document.getElementById('letter-3').value = hive.charAt(3);
-        document.getElementById('letter-4').value = hive.charAt(4);
-        document.getElementById('letter-5').value = hive.charAt(5);
-        document.getElementById('letter-6').value = hive.charAt(6);
+        document.getElementById('letter-0').value = hive.charAt(0).toUpperCase();
+        document.getElementById('letter-1').value = hive.charAt(1).toUpperCase();
+        document.getElementById('letter-2').value = hive.charAt(2).toUpperCase();
+        document.getElementById('letter-3').value = hive.charAt(3).toUpperCase();
+        document.getElementById('letter-4').value = hive.charAt(4).toUpperCase();
+        document.getElementById('letter-5').value = hive.charAt(5).toUpperCase();
+        document.getElementById('letter-6').value = hive.charAt(6).toUpperCase();
     }
 
     showHive();

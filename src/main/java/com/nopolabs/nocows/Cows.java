@@ -38,4 +38,14 @@ public class Cows {
                     return true;
                 });
     }
+
+    public boolean eachLetterHasAWord() {
+        for (String letter : hive.split("")) {
+            if (words.stream().noneMatch(word -> word.contains(letter))) {
+                LOG.info("hive = {} has no words for {}", hive, letter);
+                return false; // no words for this letter
+            }
+        }
+        return true;
+    }
 }
