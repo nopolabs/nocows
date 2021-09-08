@@ -20,6 +20,7 @@ import java.time.Instant;
 public class ApiController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiController.class);
+    private static final String SALT = "No cows secret sauce.";
 
     private final Bee bee;
     private final ProofOfWork proofOfWork;
@@ -77,6 +78,8 @@ public class ApiController {
             @PathVariable String word,
             @RequestParam String proof) {
 
+        // proof pre-validated by ProofOfWorkFilter
+
         checkProof(request, proof, hive + ":" + word);
 
         return bee.get(hive, word);
@@ -84,14 +87,16 @@ public class ApiController {
 
     private String getToken(HttpServletRequest request) {
         String ipAddress = getClientIpAddress(request);
-
-        // token = hash(ipAddress + salt):epochSecond
-        // this makes the token specific to the requester and a moment in time
-        return sha256(salt(ipAddress)) + ":" + epochSecond();
+        return createToken(ipAddress, epochSecond());
     }
 
-    private String salt(String data) {
-        return data + "SeCrEt sAlT";
+    /**
+     * @param ipAddress token is specific to the requester
+     * @param epochSecond token is specific to the moment in time
+     * @return hash(ipAddress:epochSecond:salt)
+     */
+    private String createToken(String ipAddress, long epochSecond) {
+        return sha256(String.format("%s:%d:%s", ipAddress, epochSecond, SALT));
     }
 
     private String sha256(String data) {
@@ -147,20 +152,13 @@ public class ApiController {
         }
         LOG.info("proof = [" + proof + "]");
 
-        // nonce:hash(ipAddress + salt):epochSecond:data
-        String[] parts = proof.split(":", 4);
-        if (parts.length != 4) {
+        // nonce:token:data
+        String[] parts = proof.split(":", 3);
+        if (parts.length != 3) {
             throw new IllegalArgumentException();
         }
-        String hash = parts[1];
-        long epochSecond = Long.parseLong(parts[2]);
-        String data = parts[3];
-
-        long elapsed = epochSecond() - epochSecond;
-        if (elapsed < 0 || elapsed >= 2) { // rejects greater than two seconds
-            LOG.info("elaspsed = " + elapsed);
-            throw new IllegalArgumentException();
-        }
+        String token = parts[1];
+        String data = parts[2];
 
         if (!data.equals(checkData)) {
             LOG.info(String.format("[%s] != [%s]", data, checkData));
@@ -168,9 +166,20 @@ public class ApiController {
         }
 
         String ipAddress = getClientIpAddress(request);
-        if (!hash.equals(sha256(salt(ipAddress)))) {
-            LOG.info(String.format("ipAddress = %s", ipAddress));
-            throw new IllegalArgumentException();
+        long epochSecond = epochSecond();
+
+        // check the current second
+        if (token.equals(createToken(ipAddress, epochSecond))) {
+            return;
         }
+
+        /// check the previous second
+        if (token.equals(createToken(ipAddress, epochSecond - 1))) {
+            return;
+        }
+
+        // token is too old
+        LOG.info(String.format("ipAddress = %s", ipAddress));
+        throw new IllegalArgumentException();
     }
 }
