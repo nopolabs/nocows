@@ -44,6 +44,7 @@ function init() {
         if (word.length < 7) {
             return false;
         }
+        word = word.toLowerCase();
         const hive = document.getElementById('hive').value;
         for (var i = 0; i < hive.length; i++) {
             if (!word.includes(hive.charAt(i))) {
@@ -76,11 +77,16 @@ function init() {
             })
             .then((json) => {
                 json.words.forEach(word => {
+                    word = word.toLowerCase().replace(/[^a-z]/gi, ''); // for safety
                     const capitalizedWord = word[0].toUpperCase() + word.substring(1).toLowerCase();
-                    spelled.add(capitalizedWord)
+                    spelled.add(capitalizedWord);
                 });
+                const words = Array.from(spelled)
+                    .map(word => isPangram(word) ? ("<b>" + word + "</b>") : word)
+                    .join(" ");
+                console.log(words);
                 document.getElementById('score').innerText = score(spelled);
-                document.getElementById('words').innerText = Array.from(spelled).join(" ");
+                document.getElementById('words').innerHTML = words;
                 document.getElementById('word').value = "";
             })
             .catch(error => {
