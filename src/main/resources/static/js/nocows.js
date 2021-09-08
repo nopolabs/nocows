@@ -111,7 +111,7 @@ function init() {
         fetchUrl(url);
     }
 
-    function onSubmit() {
+    function onCheck() {
         getToken()
             .then(token => {
                 const hive = document.getElementById('hive').value;
@@ -125,7 +125,34 @@ function init() {
 
     function formSubmit(event) {
         event.preventDefault();
-        onSubmit();
+        onCheck();
+    }
+
+    function onErase() {
+        const word = document.getElementById('word').value;
+        document.getElementById('word').value = word.slice(0, -1);
+    }
+
+    function random(i, n) {
+        return Math.floor(Math.random() * (n - i) + i);
+    }
+
+    function shuffle(string) {
+        let array = [...string];
+
+        array.forEach(
+            (elem, i, arr, j = random(i, arr.length)) => {
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        );
+
+        return array.join('');
+    }
+
+    function onRotate() {
+        const hive = document.getElementById('hive').value;
+        document.getElementById('hive').value = hive.charAt(0) + shuffle(hive.substring(1));
+        showHive();
     }
 
     function letterClick(event) {
@@ -147,7 +174,9 @@ function init() {
 
     showHive();
 
-    document.getElementById('submit-button').onclick = onSubmit;
+    document.getElementById('check-button').onclick = onCheck;
+    document.getElementById('rotate-button').onclick = onRotate;
+    document.getElementById('erase-button').onclick = onErase;
     document.getElementById('solution-button').onclick = onSolution;
     document.getElementById('form').addEventListener('submit', formSubmit);
     document.getElementById('letter-0').onclick = letterClick;
