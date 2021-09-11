@@ -1,0 +1,25 @@
+<body>
+<div id="app">loading...</div>
+<script>
+    const App = function () {
+        return `
+            <h1>Vanilla State Management</h1>
+            <button onClick='App.state.count++;'>
+              You pressed me ${App.state.count} ${App.state.count === 1 ? 'time' : 'times'}!
+            </button>
+          `;
+    };
+
+    const handler = {
+        set: function(obj, prop, value) {
+            obj[prop] = value;
+            document.getElementById('app').innerHTML = App();
+        },
+    };
+
+    App.state = new Proxy({ count: 0 }, handler);
+
+    // Initial Loading of the App
+    document.getElementById('app').innerHTML = App();
+</script>
+</body>

@@ -1,73 +1,118 @@
-function init() {
+const crypto = window.crypto.subtle;
 
-    const crypto = window.crypto.subtle;
+function random(i, n) {
+    return Math.floor(Math.random() * (n - i) + i);
+}
 
-    const spelled = new Set();
+function shuffle(string) {
+    let array = [...string];
 
-    // SHA-256 hash of str, returns Uint8Array
-    function sha256(str) {
-        var buffer = new TextEncoder("utf-8").encode(str)
-        return crypto.digest("SHA-256", buffer);
-    }
-
-    async function proof(data) {
-        let nonce = 0;
-        while(true) {
-            var candidate = nonce + ":" + data;
-            var hash = await sha256(candidate);
-            var view = new DataView(hash);
-            var value = view.getUint16(0) & 0xFFF0; // first 12 bits
-            if (value === 0) {
-                return candidate;
-            }
-            nonce++
+    array.forEach(
+        (elem, i, arr, j = random(i, arr.length)) => {
+            [arr[i], arr[j]] = [arr[j], arr[i]];
         }
-    }
+    );
 
-    function getToken() {
-        return fetch("/api/token")
-            .then(response => {
-                if (!response.ok) { throw Error(response.statusText);}
-                return response.text();
-            });
-    }
+    return array.join('');
+}
 
-    function getHeaderToken() {
-        return fetch("/api/headerToken")
-            .then(response => {
-                if (!response.ok) { throw Error(response.statusText);}
-                return response.headers.get("nocows-token");
-            });
-    }
+// SHA-256 hash of str, returns Uint8Array
+function sha256(str) {
+    var buffer = new TextEncoder("utf-8").encode(str)
+    return crypto.digest("SHA-256", buffer);
+}
 
-    function isPangram(word) {
-        if (word.length < 7) {
+async function proof(data) {
+    let nonce = 0;
+    while(true) {
+        const candidate = nonce + ":" + data;
+        const hash = await sha256(candidate);
+        const view = new DataView(hash);
+        const value = view.getUint16(0) & 0xFFF0; // first 12 bits
+        if (value === 0) {
+            return candidate;
+        }
+        nonce++
+    }
+}
+
+function getToken() {
+    return fetch("/api/token")
+        .then(response => {
+            if (!response.ok) { throw Error(response.statusText);}
+            return response.text();
+        });
+}
+
+function isPangram(word, hive) {
+    if (word.length < 7) {
+        return false;
+    }
+    word = word.toLowerCase();
+    for (var i = 0; i < hive.length; i++) {
+        if (!word.includes(hive.charAt(i))) {
             return false;
         }
-        word = word.toLowerCase();
-        const hive = document.getElementById('hive').value;
-        for (var i = 0; i < hive.length; i++) {
-            if (!word.includes(hive.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
     }
+    return true;
+}
 
-    function score(words) {
-        return [...words].reduce(function(score, word){
-            if (word.length < 4) {
-                return score;
-            }
-            if (word.length === 4) {
-                return score + 1;
-            }
-            if (isPangram(word)) {
-                return score + word.length + 7;
-            }
-            return score + word.length;
-        }, 0)
-    }
+function score(words, hive) {
+    return [...words].reduce(function(score, word){
+        if (word.length < 4) {
+            return score;
+        }
+        if (word.length === 4) {
+            return score + 1;
+        }
+        if (isPangram(word, hive)) {
+            return score + word.length + 7;
+        }
+        return score + word.length;
+    }, 0)
+}
+
+function words(spelled, hive) {
+    return Array.from(spelled)
+        .map(word => isPangram(word, hive) ? ("<b>" + word + "</b>") : word)
+        .join(" ");
+}
+
+function init() {
+
+    const Nocows = function () {
+
+        const handler = {
+            set: function(obj, prop, value) {
+                obj[prop] = value;
+                console.log(obj, prop, value);
+                updateView();
+            },
+        };
+
+        const state = new Proxy({
+            hive: '',
+            word: '',
+            spelled: new Set(),
+        }, handler);
+
+        function updateView() {
+            console.log("updateView", state);
+            document.getElementById('letter-0').value = state.hive.charAt(0).toUpperCase();
+            document.getElementById('letter-1').value = state.hive.charAt(1).toUpperCase();
+            document.getElementById('letter-2').value = state.hive.charAt(2).toUpperCase();
+            document.getElementById('letter-3').value = state.hive.charAt(3).toUpperCase();
+            document.getElementById('letter-4').value = state.hive.charAt(4).toUpperCase();
+            document.getElementById('letter-5').value = state.hive.charAt(5).toUpperCase();
+            document.getElementById('letter-6').value = state.hive.charAt(6).toUpperCase();
+
+            document.getElementById('score').innerText = score(state.spelled, state.hive);
+            document.getElementById('words').innerHTML = words(state.spelled, state.hive);
+            document.getElementById('word').value = state.word;
+        }
+
+        return state;
+    }();
 
     function fetchUrl(url) {
         fetch(url)
@@ -76,18 +121,14 @@ function init() {
                 return response.json();
             })
             .then((json) => {
+                const spelled = Nocows.spelled;
                 json.words.forEach(word => {
                     word = word.toLowerCase().replace(/[^a-z]/gi, ''); // for safety
                     const capitalizedWord = word[0].toUpperCase() + word.substring(1).toLowerCase();
                     spelled.add(capitalizedWord);
                 });
-                const words = Array.from(spelled)
-                    .map(word => isPangram(word) ? ("<b>" + word + "</b>") : word)
-                    .join(" ");
-                console.log(words);
-                document.getElementById('score').innerText = score(spelled);
-                document.getElementById('words').innerHTML = words;
-                document.getElementById('word').value = "";
+                Nocows.spelled = spelled;
+                Nocows.word = '';
             })
             .catch(error => {
                 console.log(error);
@@ -103,7 +144,7 @@ function init() {
     function onSolution() {
         getToken()
             .then(token => {
-                const hive = document.getElementById('hive').value;
+                const hive = Nocows.hive;
                 proof(token + ":" + hive)
                     .then(proof => {
                         solve(hive, proof);
@@ -120,8 +161,8 @@ function init() {
     function onCheck() {
         getToken()
             .then(token => {
-                const hive = document.getElementById('hive').value;
-                const word = document.getElementById('word').value;
+                const hive = Nocows.hive;
+                const word = Nocows.word;
                 proof(token + ":" + hive + ":" + word)
                     .then(proof => {
                         check(hive, word, proof);
@@ -135,50 +176,17 @@ function init() {
     }
 
     function onErase() {
-        const word = document.getElementById('word').value;
-        document.getElementById('word').value = word.slice(0, -1);
-    }
-
-    function random(i, n) {
-        return Math.floor(Math.random() * (n - i) + i);
-    }
-
-    function shuffle(string) {
-        let array = [...string];
-
-        array.forEach(
-            (elem, i, arr, j = random(i, arr.length)) => {
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-        );
-
-        return array.join('');
+        Nocows.word = Nocows.word.slice(0, -1);
     }
 
     function onRotate() {
-        const hive = document.getElementById('hive').value;
-        document.getElementById('hive').value = hive.charAt(0) + shuffle(hive.substring(1));
-        showHive();
+        const hive = Nocows.hive
+        Nocows.hive = hive.charAt(0) + shuffle(hive.substring(1));
     }
 
     function letterClick(event) {
-        const letter = event.target.value;
-        const word = document.getElementById('word').value;
-        document.getElementById('word').value = word + letter.toLowerCase();
+        Nocows.word = Nocows.word + event.target.value.toLowerCase();
     }
-
-    function showHive() {
-        const hive = document.getElementById('hive').value;
-        document.getElementById('letter-0').value = hive.charAt(0).toUpperCase();
-        document.getElementById('letter-1').value = hive.charAt(1).toUpperCase();
-        document.getElementById('letter-2').value = hive.charAt(2).toUpperCase();
-        document.getElementById('letter-3').value = hive.charAt(3).toUpperCase();
-        document.getElementById('letter-4').value = hive.charAt(4).toUpperCase();
-        document.getElementById('letter-5').value = hive.charAt(5).toUpperCase();
-        document.getElementById('letter-6').value = hive.charAt(6).toUpperCase();
-    }
-
-    showHive();
 
     document.getElementById('check-button').onclick = onCheck;
     document.getElementById('rotate-button').onclick = onRotate;
@@ -192,6 +200,8 @@ function init() {
     document.getElementById('letter-4').onclick = letterClick;
     document.getElementById('letter-5').onclick = letterClick;
     document.getElementById('letter-6').onclick = letterClick;
+
+    Nocows.hive = document.getElementById('hive').value;
 }
 
 document.addEventListener("DOMContentLoaded", init);
