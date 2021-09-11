@@ -78,6 +78,11 @@ function words(spelled, hive) {
         .join(" ");
 }
 
+function capitalize(word) {
+    word = word.toLowerCase().replace(/[^a-z]/gi, ''); // for safety
+    return word[0].toUpperCase() + word.substring(1).toLowerCase();
+}
+
 function init() {
 
     const Nocows = function () {
@@ -85,8 +90,11 @@ function init() {
         const handler = {
             set: function(obj, prop, value) {
                 obj[prop] = value;
-                console.log(obj, prop, value);
-                updateView();
+                switch (prop) {
+                    case 'hive': updateHive(); break;
+                    case 'word': updateWord(); break;
+                    case 'spelled': updateSpelled(); break;
+                }
             },
         };
 
@@ -96,8 +104,7 @@ function init() {
             spelled: new Set(),
         }, handler);
 
-        function updateView() {
-            console.log("updateView", state);
+        function updateHive() {
             document.getElementById('letter-0').value = state.hive.charAt(0).toUpperCase();
             document.getElementById('letter-1').value = state.hive.charAt(1).toUpperCase();
             document.getElementById('letter-2').value = state.hive.charAt(2).toUpperCase();
@@ -105,10 +112,15 @@ function init() {
             document.getElementById('letter-4').value = state.hive.charAt(4).toUpperCase();
             document.getElementById('letter-5').value = state.hive.charAt(5).toUpperCase();
             document.getElementById('letter-6').value = state.hive.charAt(6).toUpperCase();
+        }
 
+        function updateWord() {
+            document.getElementById('word').value = state.word;
+        }
+
+       function updateSpelled() {
             document.getElementById('score').innerText = score(state.spelled, state.hive);
             document.getElementById('words').innerHTML = words(state.spelled, state.hive);
-            document.getElementById('word').value = state.word;
         }
 
         return state;
@@ -123,9 +135,7 @@ function init() {
             .then((json) => {
                 const spelled = Nocows.spelled;
                 json.words.forEach(word => {
-                    word = word.toLowerCase().replace(/[^a-z]/gi, ''); // for safety
-                    const capitalizedWord = word[0].toUpperCase() + word.substring(1).toLowerCase();
-                    spelled.add(capitalizedWord);
+                    spelled.add(capitalize(word));
                 });
                 Nocows.spelled = spelled;
                 Nocows.word = '';
