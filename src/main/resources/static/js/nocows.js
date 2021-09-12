@@ -1,88 +1,3 @@
-const crypto = window.crypto.subtle;
-
-function random(i, n) {
-    return Math.floor(Math.random() * (n - i) + i);
-}
-
-function shuffle(string) {
-    let array = [...string];
-
-    array.forEach(
-        (elem, i, arr, j = random(i, arr.length)) => {
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-    );
-
-    return array.join('');
-}
-
-// SHA-256 hash of str, returns Uint8Array
-function sha256(str) {
-    var buffer = new TextEncoder("utf-8").encode(str)
-    return crypto.digest("SHA-256", buffer);
-}
-
-async function proof(data) {
-    let nonce = 0;
-    while(true) {
-        const candidate = nonce + ":" + data;
-        const hash = await sha256(candidate);
-        const view = new DataView(hash);
-        const value = view.getUint16(0) & 0xFFF0; // first 12 bits
-        if (value === 0) {
-            return candidate;
-        }
-        nonce++
-    }
-}
-
-function getToken() {
-    return fetch("/api/token")
-        .then(response => {
-            if (!response.ok) { throw Error(response.statusText);}
-            return response.text();
-        });
-}
-
-function isPangram(word, hive) {
-    if (word.length < 7) {
-        return false;
-    }
-    word = word.toLowerCase();
-    for (var i = 0; i < hive.length; i++) {
-        if (!word.includes(hive.charAt(i))) {
-            return false;
-        }
-    }
-    return true;
-}
-
-function score(words, hive) {
-    return [...words].reduce(function(score, word){
-        if (word.length < 4) {
-            return score;
-        }
-        if (word.length === 4) {
-            return score + 1;
-        }
-        if (isPangram(word, hive)) {
-            return score + word.length + 7;
-        }
-        return score + word.length;
-    }, 0)
-}
-
-function words(spelled, hive) {
-    return Array.from(spelled)
-        .map(word => isPangram(word, hive) ? ("<b>" + word + "</b>") : word)
-        .join(" ");
-}
-
-function capitalize(word) {
-    word = word.toLowerCase().replace(/[^a-z]/gi, ''); // for safety
-    return word[0].toUpperCase() + word.substring(1).toLowerCase();
-}
-
 function init() {
 
     const Nocows = function () {
@@ -126,46 +41,24 @@ function init() {
         return state;
     }();
 
-    function fetchUrl(url) {
-        fetch(url)
-            .then(response => {
-                if (!response.ok) { throw Error(response.statusText);}
-                return response.json();
-            })
-            .then((json) => {
-                const spelled = Nocows.spelled;
-                json.words.forEach(word => {
-                    spelled.add(capitalize(word));
-                });
-                Nocows.spelled = spelled;
-                Nocows.word = '';
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }
-
-    function solve(hive, proof) {
-        const params = new URLSearchParams({ proof: proof });
-        const url = "/api/cows/" + hive + "?" + params;
-        fetchUrl(url);
+    function handleWords(words) {
+        const spelled = Nocows.spelled;
+        words.forEach(word => {
+            spelled.add(capitalize(word));
+        });
+        Nocows.spelled = spelled;
+        Nocows.word = '';
     }
 
     function onSolution() {
         getToken()
             .then(token => {
                 const hive = Nocows.hive;
-                proof(token + ":" + hive)
+                proof(token + ':' + hive)
                     .then(proof => {
-                        solve(hive, proof);
+                        getWords(hive, '', proof, handleWords);
                     })
             })
-    }
-
-    function check(hive, word, proof) {
-        const params = new URLSearchParams({ proof: proof });
-        const url = "/api/cows/" + hive + "/" + word.toLowerCase() + "?" + params;
-        fetchUrl(url);
     }
 
     function onCheck() {
@@ -173,9 +66,9 @@ function init() {
             .then(token => {
                 const hive = Nocows.hive;
                 const word = Nocows.word;
-                proof(token + ":" + hive + ":" + word)
+                proof(token + ':' + hive + ':' + word)
                     .then(proof => {
-                        check(hive, word, proof);
+                        getWords(hive, word, proof, handleWords);
                     });
             });
     }
@@ -195,7 +88,8 @@ function init() {
     }
 
     function letterClick(event) {
-        Nocows.word = Nocows.word + event.target.value.toLowerCase();
+        const word = Nocows.word;
+        Nocows.word = word + event.target.value.toLowerCase();
     }
 
     document.getElementById('check-button').onclick = onCheck;
@@ -214,4 +108,4 @@ function init() {
     Nocows.hive = document.getElementById('hive').value;
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener('DOMContentLoaded', init);
