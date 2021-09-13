@@ -1,12 +1,15 @@
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
+
 const crypto = window.crypto.subtle;
 
 // SHA-256 hash of str, returns Uint8Array
-function sha256(str) {
+const sha256 = function(str) {
     var buffer = new TextEncoder('utf-8').encode(str)
     return crypto.digest('SHA-256', buffer);
 }
 
-async function proof(data) {
+const proof = async function(data) {
     let nonce = 0;
     while(true) {
         const candidate = nonce + ':' + data;
@@ -19,3 +22,5 @@ async function proof(data) {
         nonce++
     }
 }
+
+export { proof };

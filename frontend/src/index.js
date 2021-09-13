@@ -1,3 +1,8 @@
+import { getToken, getWords } from './api';
+import { proof } from './proof';
+import { score, words, capitalize } from './bee';
+import { shuffle } from './shuffle';
+
 function init() {
 
     const Nocows = function () {
@@ -10,6 +15,7 @@ function init() {
                     case 'word': updateWord(); break;
                     case 'spelled': updateSpelled(); break;
                 }
+                return true; // success!
             },
         };
 
@@ -33,7 +39,7 @@ function init() {
             document.getElementById('word').value = state.word;
         }
 
-       function updateSpelled() {
+        function updateSpelled() {
             document.getElementById('score').innerText = score(state.spelled, state.hive);
             document.getElementById('words').innerHTML = words(state.spelled, state.hive);
         }

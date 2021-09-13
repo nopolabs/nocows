@@ -1,4 +1,4 @@
-function getToken() {
+const getToken = function() {
     return fetch('/api/token')
         .then(response => {
             if (!response.ok) { throw Error(response.statusText); }
@@ -6,7 +6,7 @@ function getToken() {
         });
 }
 
-function getWords(hive, word, proof, handleWords) {
+const getWords = function(hive, word, proof, handleWords) {
     const params = new URLSearchParams({ proof: proof });
     const path = words === '' ? '' : '/' + word.toLowerCase()
     const url = '/api/cows/' + hive + path + '?' + params;
@@ -22,3 +22,5 @@ function getWords(hive, word, proof, handleWords) {
             console.log(error);
         });
 }
+
+export { getToken, getWords };

@@ -36,3 +36,5 @@ function capitalize(word) {
     word = word.toLowerCase().replace(/[^a-z]/gi, ''); // for safety
     return word[0].toUpperCase() + word.substring(1).toLowerCase();
 }
+
+export { score, words, capitalize };

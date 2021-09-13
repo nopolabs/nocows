@@ -13,3 +13,5 @@ function shuffle(string) {
 
     return array.join('');
 }
+
+export { shuffle };
