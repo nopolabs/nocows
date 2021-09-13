@@ -1,7 +1,5 @@
 # things TODO
 
-# sorted words
-
 # separate user solved words from full solution
 
 # button to show count and/or score for all possble words

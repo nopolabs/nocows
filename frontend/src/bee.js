@@ -28,6 +28,7 @@ function score(words, hive) {
 
 function words(spelled, hive) {
     return Array.from(spelled)
+        .sort()
         .map(word => isPangram(word, hive) ? ("<b>" + word + "</b>") : word)
         .join(" ");
 }
