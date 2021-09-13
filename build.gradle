@@ -28,3 +28,23 @@ dependencies {
 test {
 	useJUnitPlatform()
 }
+
+task buildFrontend(type: Exec) {
+	workingDir "$projectDir/frontend"
+	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+		commandLine 'cmd', '/c', 'npm run build'
+	} else {
+		commandLine 'sh', '-c', 'npm run build'
+	}
+}
+
+task installFrontend(type: Exec, dependsOn: 'buildFrontend') {
+	workingDir "$projectDir"
+	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+		commandLine 'cmd', '/c', 'cp frontend/dist/bundle.js src/main/resources/static/dist/'
+	} else {
+		commandLine 'sh', '-c', 'cp frontend/dist/bundle.js src/main/resources/static/dist/'
+	}
+}
+
+processResources.dependsOn 'installFrontend'
