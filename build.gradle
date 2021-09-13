@@ -32,9 +32,9 @@ test {
 task buildFrontend(type: Exec) {
 	workingDir "$projectDir/frontend"
 	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-		commandLine 'cmd', '/c', 'npm run build'
+		commandLine 'cmd', '/c', 'npm run dev'
 	} else {
-		commandLine 'sh', '-c', 'npm run build'
+		commandLine 'sh', '-c', 'npm run dev'
 	}
 }
 

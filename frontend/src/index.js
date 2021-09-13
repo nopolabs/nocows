@@ -1,5 +1,4 @@
-import { getToken, getWords } from './api';
-import { proof } from './proof';
+import { getHive, getWords } from './api';
 import { score, words, capitalize } from './bee';
 import { shuffle } from './shuffle';
 
@@ -57,26 +56,11 @@ function init() {
     }
 
     function onSolution() {
-        getToken()
-            .then(token => {
-                const hive = Nocows.hive;
-                proof(token + ':' + hive)
-                    .then(proof => {
-                        getWords(hive, '', proof, handleWords);
-                    })
-            })
+        getWords(Nocows.hive, '', handleWords);
     }
 
     function onCheck() {
-        getToken()
-            .then(token => {
-                const hive = Nocows.hive;
-                const word = Nocows.word;
-                proof(token + ':' + hive + ':' + word)
-                    .then(proof => {
-                        getWords(hive, word, proof, handleWords);
-                    });
-            });
+        getWords(Nocows.hive, Nocows.word, handleWords);
     }
 
     function formSubmit(event) {
@@ -111,7 +95,9 @@ function init() {
     document.getElementById('letter-5').onclick = letterClick;
     document.getElementById('letter-6').onclick = letterClick;
 
-    Nocows.hive = document.getElementById('hive').value;
+    getHive(hive => {
+        Nocows.hive = hive
+    });
 }
 
 document.addEventListener('DOMContentLoaded', init);

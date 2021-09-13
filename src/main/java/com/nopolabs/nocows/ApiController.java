@@ -32,6 +32,16 @@ public class ApiController {
         this.proofOfWork = proofOfWork;
     }
 
+    @GetMapping("/hive")
+    String hive(
+            HttpServletRequest request,
+            @RequestParam String proof) {
+
+        checkProof(request, proof, "/hive");
+
+        return bee.getHive();
+    }
+
     @GetMapping("/token")
     String token(HttpServletRequest request) {
 
@@ -50,7 +60,7 @@ public class ApiController {
             @PathVariable String hive,
             @RequestParam String proof) {
 
-        checkProof(request, proof, hive);
+        checkProof(request, proof, "/cows/" + hive);
 
         return bee.get(hive.toLowerCase());
     }
@@ -66,7 +76,7 @@ public class ApiController {
             throw new IllegalArgumentException();
         }
 
-        checkProof(request, proof, hive + ":" + word);
+        checkProof(request, proof, "/cows/" + hive + "/" + word);
 
         return bee.get(hive.toLowerCase(), word.toLowerCase());
     }
@@ -80,7 +90,7 @@ public class ApiController {
 
         // proof pre-validated by ProofOfWorkFilter
 
-        checkProof(request, proof, hive + ":" + word);
+        checkProof(request, proof, "/filter/" + hive + "/" + word);
 
         return bee.get(hive, word);
     }
