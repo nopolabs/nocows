@@ -29,3 +29,7 @@
 
 ## previous hives
 - so you can compare your score to others
+
+## better word list
+- https://www.keithv.com/software/wlist/
+- trying https://www.keithv.com/software/wlist/wlist_match5.zip
