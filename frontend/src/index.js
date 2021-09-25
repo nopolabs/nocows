@@ -1,14 +1,17 @@
 import { getHive, solve, check } from './api';
 import { score, words, capitalize } from './bee';
 import { shuffle } from './shuffle';
+import { initGrid } from './grid';
 
 function init() {
+
+    const grid = initGrid(document.getElementById('grid'));
 
     const Nocows = function () {
 
         const handler = {
             set: function(obj, prop, value) {
-                // console.log('set', prop, value);
+                console.log('set', prop, value);
                 obj[prop] = value;
                 switch (prop) {
                     case 'hive': updateHive(value); break;
@@ -30,7 +33,7 @@ function init() {
         }, handler);
 
         function updateHive(value) {
-            // console.log('updateHive', value, state.hive)
+            console.log('updateHive', value, state.hive)
             document.getElementById('letter-0').value = value.charAt(0).toUpperCase();
             document.getElementById('letter-1').value = value.charAt(1).toUpperCase();
             document.getElementById('letter-2').value = value.charAt(2).toUpperCase();
@@ -38,6 +41,8 @@ function init() {
             document.getElementById('letter-4').value = value.charAt(4).toUpperCase();
             document.getElementById('letter-5').value = value.charAt(5).toUpperCase();
             document.getElementById('letter-6').value = value.charAt(6).toUpperCase();
+
+            grid.draw(value)
         }
 
         function updateCount(value) {
