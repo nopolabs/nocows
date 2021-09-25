@@ -5,13 +5,11 @@ import { initGrid } from './grid';
 
 function init() {
 
-    const grid = initGrid(document.getElementById('grid'));
-
     const Nocows = function () {
 
         const handler = {
             set: function(obj, prop, value) {
-                console.log('set', prop, value);
+                // console.log('set', prop, value);
                 obj[prop] = value;
                 switch (prop) {
                     case 'hive': updateHive(value); break;
@@ -31,6 +29,16 @@ function init() {
             word: '',
             spelled: new Set(),
         }, handler);
+
+        const grid = initGrid(document.getElementById('grid'), clickIndex);
+
+        function clickIndex(index) {
+            if (index < 0 || index > 6) {
+                return
+            }
+            const word = state.word;
+            state.word = word + state.hive.charAt(index);
+        }
 
         function updateHive(value) {
             console.log('updateHive', value, state.hive)

@@ -9,15 +9,17 @@ const cells = [
     [3, 4, 5]
 ]
 
-const initGrid = function(element) {
+function toIndex(x, y) {
+    return cells[x][y]
+}
+
+const initGrid = function(element, clickIndex) {
 
     console.log('initGrid', element)
 
-    var hive;
-
     const Hex = Honeycomb.extendHex({
         size: size,
-        render(draw) {
+        render(draw, hive) {
             const position = this.toPoint()
             const centerPosition = this.center().add(position)
 
@@ -37,7 +39,8 @@ const initGrid = function(element) {
                 // draw x and y coordinates
                 const x = this.x
                 const y = this.y
-                const text = `${hive.charAt(cells[x][y]).toUpperCase()}`
+                const index = toIndex(x, y)
+                const text = `${hive.charAt(index).toUpperCase()}`
                 this.draw
                     .text(text)
                     .font({
@@ -55,18 +58,20 @@ const initGrid = function(element) {
 
     element.addEventListener('click', ({ offsetX, offsetY }) => {
         const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
-        console.log('hexCoordinates', hexCoordinates)
+        const x = hexCoordinates.x
+        const y = hexCoordinates.y
+        if (x < 0 || x > 2 || y < 0 | y > 2) {
+            return
+        }
+        const index = toIndex(x, y)
+        clickIndex(index)
     })
 
     const draw = function(value) {
-
-        hive = value;
-
         element.replaceChildren();
 
-        const svg = SVG(element)
-
-        console.log('draw', hive, element)
+        const draw = SVG(element)
+        const hive = value
 
         Grid.rectangle({
             width: 3,      // value:	number (width in hexes)
@@ -74,8 +79,7 @@ const initGrid = function(element) {
             start: [0, 0], // value: 	any point
             direction: 0,  // value:	0, 1, 2, 3, 4 or 5
             onCreate: hex => {
-                console.log('hex', hex)
-                hex.render(svg)
+                hex.render(draw, hive)
             }
         })
     }
