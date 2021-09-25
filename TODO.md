@@ -2,7 +2,7 @@
 
 # separate user solved words from full solution
 
-# button to show count and/or score for all possble words
+# button to show count and/or score for all possible words
 
 # hexagon layout
 - https://medium.com/@Flauwekeul/honeycomb-hexagon-grids-in-javascript-555d2f9ac54f

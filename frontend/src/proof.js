@@ -9,7 +9,7 @@ const sha256 = function(str) {
     return crypto.digest('SHA-256', buffer);
 }
 
-const proof = async function(data) {
+const prove = async function(data) {
     let nonce = 0;
     while(true) {
         const candidate = nonce + ':' + data;
@@ -23,4 +23,4 @@ const proof = async function(data) {
     }
 }
 
-export { proof };
+export { prove };

@@ -1,4 +1,4 @@
-import { getHive, getWords } from './api';
+import { getHive, solve, check } from './api';
 import { score, words, capitalize } from './bee';
 import { shuffle } from './shuffle';
 
@@ -8,11 +8,14 @@ function init() {
 
         const handler = {
             set: function(obj, prop, value) {
+                // console.log('set', prop, value);
                 obj[prop] = value;
                 switch (prop) {
-                    case 'hive': updateHive(); break;
-                    case 'word': updateWord(); break;
-                    case 'spelled': updateSpelled(); break;
+                    case 'hive': updateHive(value); break;
+                    case 'count': updateCount(value); break;
+                    case 'total': updateTotal(value); break;
+                    case 'word': updateWord(value); break;
+                    case 'spelled': updateSpelled(value); break;
                 }
                 return true; // success!
             },
@@ -20,47 +23,68 @@ function init() {
 
         const state = new Proxy({
             hive: '',
+            count: 0,
+            total: 0,
             word: '',
             spelled: new Set(),
         }, handler);
 
-        function updateHive() {
-            document.getElementById('letter-0').value = state.hive.charAt(0).toUpperCase();
-            document.getElementById('letter-1').value = state.hive.charAt(1).toUpperCase();
-            document.getElementById('letter-2').value = state.hive.charAt(2).toUpperCase();
-            document.getElementById('letter-3').value = state.hive.charAt(3).toUpperCase();
-            document.getElementById('letter-4').value = state.hive.charAt(4).toUpperCase();
-            document.getElementById('letter-5').value = state.hive.charAt(5).toUpperCase();
-            document.getElementById('letter-6').value = state.hive.charAt(6).toUpperCase();
+        function updateHive(value) {
+            // console.log('updateHive', value, state.hive)
+            document.getElementById('letter-0').value = value.charAt(0).toUpperCase();
+            document.getElementById('letter-1').value = value.charAt(1).toUpperCase();
+            document.getElementById('letter-2').value = value.charAt(2).toUpperCase();
+            document.getElementById('letter-3').value = value.charAt(3).toUpperCase();
+            document.getElementById('letter-4').value = value.charAt(4).toUpperCase();
+            document.getElementById('letter-5').value = value.charAt(5).toUpperCase();
+            document.getElementById('letter-6').value = value.charAt(6).toUpperCase();
         }
 
-        function updateWord() {
-            document.getElementById('word').value = state.word;
+        function updateCount(value) {
+            // console.log('updateCount', value, state.count)
+            document.getElementById('count').innerText = value;
         }
 
-        function updateSpelled() {
-            document.getElementById('score').innerText = score(state.spelled, state.hive);
-            document.getElementById('words').innerHTML = words(state.spelled, state.hive);
+        function updateTotal(value) {
+            // console.log('updateTotal', value, state.total);
+            document.getElementById('total').innerText = value;
+        }
+
+        function updateWord(value) {
+            // console.log('updateWord', value, state.word)
+            document.getElementById('word').value = value;
+        }
+
+        function updateSpelled(value) {
+            // console.log('updateSpelled', value, state.spelled)
+            document.getElementById('score').innerText = score(value, state.hive);
+            document.getElementById('words').innerHTML = words(value, state.hive);
+            state.count = value.size;
         }
 
         return state;
     }();
 
-    function handleWords(words) {
-        const spelled = Nocows.spelled;
-        words.forEach(word => {
-            spelled.add(capitalize(word));
-        });
-        Nocows.spelled = spelled;
-        Nocows.word = '';
-    }
-
     function onSolution() {
-        getWords(Nocows.hive, '', handleWords);
+        solve(Nocows.hive, json => {
+            const spelled = Nocows.spelled;
+            json.words.forEach(word => {
+                spelled.add(capitalize(word));
+            });
+            Nocows.spelled = spelled;
+            Nocows.word = '';
+        });
     }
 
     function onCheck() {
-        getWords(Nocows.hive, Nocows.word, handleWords);
+        check(Nocows.hive, Nocows.word, json => {
+            const spelled = Nocows.spelled;
+            if (json.found) {
+                spelled.add(capitalize(json.word));
+                Nocows.spelled = spelled;
+            }
+            Nocows.word = '';
+        });
     }
 
     function formSubmit(event) {
@@ -95,8 +119,10 @@ function init() {
     document.getElementById('letter-5').onclick = letterClick;
     document.getElementById('letter-6').onclick = letterClick;
 
-    getHive(hive => {
-        Nocows.hive = hive
+    getHive(json => {
+        // console.log(json);
+        Nocows.hive = json.hive;
+        Nocows.total = json.total;
     });
 }
 

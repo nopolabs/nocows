@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class Bee {
@@ -28,41 +27,38 @@ public class Bee {
         LOG.info("Loaded {} words.", trie.getCount());
     }
 
-    public Cows get(String hive) {
+    public Solution solve(String hive) {
         List<String> found = words.stream()
                 .filter(word -> inHive(hive, word))
                 .collect(Collectors.toList());
-        return new Cows(hive, found);
+        return new Solution(hive, found);
     }
 
-    public Cows get(String hive, String candidate) {
-        List<String> found = Stream.of(candidate)
-                .filter(word -> inHive(hive, word))
-                .filter(trie::contains)
-                .collect(Collectors.toList());
-        return new Cows(hive, found);
+    public Check check(String hive, String word) {
+        boolean found = inHive(hive, word) && trie.contains(word);
+        return new Check(hive, word, found);
     }
 
-    public String getHive() {
+    public Hive hive() {
         while(true) {
             String hive = pickVowels(2);
             hive = hive + pickLetters(5, hive);
             hive = shuffle(hive);
-            Cows cows = get(hive);
+            Solution solution = solve(hive);
             if (hive.contains("q") && !hive.contains("u")) {
                 continue;
             }
-            if (cows.getWords().size() < 20) {
+            if (solution.getWords().size() < 20) {
                 continue;
             }
-            if (!cows.hasPangram()) {
+            if (!solution.hasPangram()) {
                 continue;
             }
-            if (!cows.eachLetterHasAWord()) {
+            if (!solution.eachLetterHasAWord()) {
                 continue;
             }
 
-            return hive;
+            return new Hive(hive, solution.getWords().size());
         }
     }
 

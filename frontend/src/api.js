@@ -1,6 +1,7 @@
-import { proof } from './proof';
+import { prove } from './proof';
 
-const getToken = function() {
+function getToken() {
+    // console.log('getToken');
     return fetch('/api/token')
         .then(response => {
             if (!response.ok) { throw Error(response.statusText); }
@@ -8,51 +9,50 @@ const getToken = function() {
         });
 }
 
-const getWords = function(hive, word, handleWords) {
-    console.log('getWords', hive, word);
-    const path = '/cows/' + hive + (word === ''  ? '' : '/' + word.toLowerCase());
-    getToken()
+function getProof(path, callApiWith) {
+    // console.log('getProof', path);
+    return getToken()
         .then(token => {
-            proof(token + ':' + path)
-                .then(proof => {
-                    const params = new URLSearchParams({ proof: proof });
-                    const url = '/api' + path + '?' + params;
-                    fetch(url)
-                        .then(response => {
-                            if (!response.ok) { throw Error(response.statusText); }
-                            return response.json();
-                        })
-                        .then(json => {
-                            handleWords(json.words)
-                        })
-                        .catch(error => {
-                            console.log(error);
-                        });
-                });
+            prove(token + ':' + path)
+                .then(proof => callApiWith(proof));
         });
 }
 
-const getHive = function(handleHive) {
+function callApiWithProof(path, proof, handleJson) {
+    // console.log('callApiWithProof', path, proof);
+    const params = new URLSearchParams({ proof: proof });
+    const url = '/api' + path + '?' + params;
+    fetch(url)
+        .then(response => {
+            if (!response.ok) { throw Error(response.statusText); }
+            return response.json();
+        })
+        .then(json => { handleJson(json) })
+        .catch(error => { console.log(error) });
+}
+
+function callApi(path, handleJson) {
+    // console.log('callApi', path);
+    getProof(path, proof => {
+        callApiWithProof(path, proof, handleJson);
+    });
+}
+
+const solve = function(hive, handleJson) {
+    // console.log('solve', hive);
+    const path = '/cows/' + hive;
+    callApi(path, handleJson);
+}
+
+const check = function(hive, word, handleJson) {
+    // console.log('check', hive, word);
+    const path = '/cows/' + hive.toLowerCase() + '/' + word.toLowerCase();
+    callApi(path, handleJson);
+}
+
+const getHive = function(handleJson) {
     const path = '/hive';
-    getToken()
-        .then(token => {
-            proof(token + ':' + path)
-                .then(proof => {
-                    const params = new URLSearchParams({ proof: proof });
-                    const url = '/api' + path + '?' + params;
-                    fetch(url)
-                        .then(response => {
-                            if (!response.ok) { throw Error(response.statusText); }
-                            return response.text();
-                        })
-                        .then(hive => {
-                            handleHive(hive)
-                        })
-                        .catch(error => {
-                            console.log(error);
-                        });
-                });
-        });
+    callApi(path, handleJson);
 }
 
-export { getHive, getWords };
+export { getHive, solve, check };

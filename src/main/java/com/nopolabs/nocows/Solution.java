@@ -5,14 +5,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class Cows {
+public class Solution {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Cows.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Solution.class);
 
     private final String hive;
     private final List<String> words;
 
-    Cows(String hive, List<String> words) {
+    Solution(String hive, List<String> words) {
         this.hive = hive;
         this.words = words;
     }

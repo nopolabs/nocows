@@ -32,14 +32,17 @@ public class ApiController {
         this.proofOfWork = proofOfWork;
     }
 
+    /**
+     * get a new game
+     */
     @GetMapping("/hive")
-    String hive(
+    Hive hive(
             HttpServletRequest request,
             @RequestParam String proof) {
 
         checkProof(request, proof, "/hive");
 
-        return bee.getHive();
+        return bee.hive();
     }
 
     @GetMapping("/token")
@@ -54,19 +57,25 @@ public class ApiController {
         response.addHeader("nocows-token", getToken(request));
     }
 
+    /**
+     * gets all the words
+     */
     @GetMapping("/cows/{hive}")
-    Cows hive(
+    Solution solve(
             HttpServletRequest request,
             @PathVariable String hive,
             @RequestParam String proof) {
 
         checkProof(request, proof, "/cows/" + hive);
 
-        return bee.get(hive.toLowerCase());
+        return bee.solve(hive.toLowerCase());
     }
 
+    /**
+     * checks one word
+     */
     @GetMapping("/cows/{hive}/{word}")
-    Cows hive(
+    Check check(
             HttpServletRequest request,
             @PathVariable String hive,
             @PathVariable String word,
@@ -78,11 +87,11 @@ public class ApiController {
 
         checkProof(request, proof, "/cows/" + hive + "/" + word);
 
-        return bee.get(hive.toLowerCase(), word.toLowerCase());
+        return bee.check(hive.toLowerCase(), word.toLowerCase());
     }
 
     @GetMapping("/filter/{hive}/{word}")
-    Cows checkHive(
+    Check filterCheck(
             HttpServletRequest request,
             @PathVariable String hive,
             @PathVariable String word,
@@ -92,7 +101,7 @@ public class ApiController {
 
         checkProof(request, proof, "/filter/" + hive + "/" + word);
 
-        return bee.get(hive, word);
+        return bee.check(hive.toLowerCase(), word.toLowerCase());
     }
 
     private String getToken(HttpServletRequest request) {
