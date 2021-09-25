@@ -5,7 +5,7 @@ import { initGrid } from './grid';
 
 function init() {
 
-    const Nocows = function () {
+    const Nocows = function (gridElement) {
 
         const handler = {
             set: function(obj, prop, value) {
@@ -30,7 +30,7 @@ function init() {
             spelled: new Set(),
         }, handler);
 
-        const grid = initGrid(document.getElementById('grid'), clickIndex);
+        const grid = initGrid(gridElement, clickIndex);
 
         function clickIndex(index) {
             if (index < 0 || index > 6) {
@@ -41,15 +41,7 @@ function init() {
         }
 
         function updateHive(value) {
-            console.log('updateHive', value, state.hive)
-            document.getElementById('letter-0').value = value.charAt(0).toUpperCase();
-            document.getElementById('letter-1').value = value.charAt(1).toUpperCase();
-            document.getElementById('letter-2').value = value.charAt(2).toUpperCase();
-            document.getElementById('letter-3').value = value.charAt(3).toUpperCase();
-            document.getElementById('letter-4').value = value.charAt(4).toUpperCase();
-            document.getElementById('letter-5').value = value.charAt(5).toUpperCase();
-            document.getElementById('letter-6').value = value.charAt(6).toUpperCase();
-
+            // console.log('updateHive', value, state.hive)
             grid.draw(value)
         }
 
@@ -75,67 +67,80 @@ function init() {
             state.count = value.size;
         }
 
-        return state;
-    }();
-
-    function onSolution() {
-        solve(Nocows.hive, json => {
-            const spelled = Nocows.spelled;
-            json.words.forEach(word => {
-                spelled.add(capitalize(word));
+        function onSolution() {
+            solve(state.hive, json => {
+                const spelled = state.spelled;
+                json.words.forEach(word => {
+                    spelled.add(capitalize(word));
+                });
+                state.spelled = spelled;
+                state.word = '';
             });
-            Nocows.spelled = spelled;
-            Nocows.word = '';
-        });
-    }
+        }
 
-    function onCheck() {
-        check(Nocows.hive, Nocows.word, json => {
-            const spelled = Nocows.spelled;
-            if (json.found) {
-                spelled.add(capitalize(json.word));
-                Nocows.spelled = spelled;
+        function onCheck() {
+            if (state.word.length > 0) {
+                check(state.hive, state.word, json => {
+                    const spelled = state.spelled;
+                    if (json.found) {
+                        spelled.add(capitalize(json.word));
+                        state.spelled = spelled;
+                    }
+                    state.word = '';
+                });
             }
-            Nocows.word = '';
-        });
-    }
+            document.getElementById('word').focus()
+        }
 
-    function formSubmit(event) {
+        function onErase() {
+            state.word = state.word.slice(0, -1);
+        }
+
+        function onRotate() {
+            const hive = state.hive
+            state.hive = hive.charAt(0) + shuffle(hive.substring(1));
+        }
+
+        function setHive(hive) {
+            state.hive = hive
+        }
+
+        function setTotal(total) {
+            state.total = total
+        }
+
+        function setWord(word) {
+            state.word = word
+        }
+
+        return {
+            setHive: setHive,
+            setTotal: setTotal,
+            setWord: setWord,
+            onCheck: onCheck,
+            onRotate: onRotate,
+            onErase: onErase,
+            onSolution: onSolution
+        };
+    }(document.getElementById('grid'));
+
+    document.getElementById('check-button').onclick = Nocows.onCheck;
+    document.getElementById('rotate-button').onclick = Nocows.onRotate;
+    document.getElementById('erase-button').onclick = Nocows.onErase;
+    document.getElementById('solution-button').onclick = Nocows.onSolution;
+    document.getElementById('form').addEventListener('submit', (event) => {
         event.preventDefault();
-        onCheck();
-    }
-
-    function onErase() {
-        Nocows.word = Nocows.word.slice(0, -1);
-    }
-
-    function onRotate() {
-        const hive = Nocows.hive
-        Nocows.hive = hive.charAt(0) + shuffle(hive.substring(1));
-    }
-
-    function letterClick(event) {
-        const word = Nocows.word;
-        Nocows.word = word + event.target.value.toLowerCase();
-    }
-
-    document.getElementById('check-button').onclick = onCheck;
-    document.getElementById('rotate-button').onclick = onRotate;
-    document.getElementById('erase-button').onclick = onErase;
-    document.getElementById('solution-button').onclick = onSolution;
-    document.getElementById('form').addEventListener('submit', formSubmit);
-    document.getElementById('letter-0').onclick = letterClick;
-    document.getElementById('letter-1').onclick = letterClick;
-    document.getElementById('letter-2').onclick = letterClick;
-    document.getElementById('letter-3').onclick = letterClick;
-    document.getElementById('letter-4').onclick = letterClick;
-    document.getElementById('letter-5').onclick = letterClick;
-    document.getElementById('letter-6').onclick = letterClick;
+        Nocows.setWord(document.getElementById('word').value)
+        Nocows.onCheck()
+    });
+    document.getElementById('word').addEventListener('change', () => {
+        Nocows.setWord(document.getElementById('word').value)
+    });
 
     getHive(json => {
         // console.log(json);
-        Nocows.hive = json.hive;
-        Nocows.total = json.total;
+        Nocows.setHive(json.hive);
+        Nocows.setTotal(json.total);
     });
 }
 
