@@ -169,7 +169,7 @@ public class ApiController {
         if (proof == null) {
             throw new IllegalArgumentException();
         }
-        LOG.info("proof = [" + proof + "]");
+//        LOG.info("proof = [" + proof + "]");
 
         // nonce:token:data
         String[] parts = proof.split(":", 3);
@@ -180,7 +180,7 @@ public class ApiController {
         String data = parts[2];
 
         if (!data.equals(checkData)) {
-            LOG.info(String.format("[%s] != [%s]", data, checkData));
+            LOG.error(String.format("[%s] != [%s]", data, checkData));
             throw new IllegalArgumentException();
         }
 
@@ -198,7 +198,7 @@ public class ApiController {
         }
 
         // token is too old
-        LOG.info(String.format("ipAddress = %s", ipAddress));
+        LOG.error(String.format("ipAddress = %s", ipAddress));
         throw new IllegalArgumentException();
     }
 }

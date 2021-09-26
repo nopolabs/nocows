@@ -1,53 +1,47 @@
 import { extendHex, defineGrid } from 'honeycomb-grid'
 import { SVG } from '@svgdotjs/svg.js'
 
-const size = 40
-const fontSize = 20
-const cells = [
-    [-1, 1, -1],
-    [2, 0, 6],
-    [3, 4, 5]
-]
+const HEX_SIZE = 40
+const FONT_SIZE = 24
+const FONT_LEADING = 1.4
+const FONT_FILL = '#69c'
+const STROKE_WIDTH = 1
+const STROKE_COLOR = '#999'
 
-function toIndex(x, y) {
-    return cells[x][y]
-}
-
-const initGrid = function(element, clickIndex) {
+const initGrid = function(element, clickIndex, getText, isHexVisible) {
 
     const Hex = extendHex({
-        size: size,
+        size: HEX_SIZE,
         render(draw, hive) {
             const position = this.toPoint()
             const centerPosition = this.center().add(position)
 
             this.draw = draw
 
-            if (this.x > 0 || this.y === 1) {
-                // draw the hex
+            // draw the hex
+            if (isHexVisible(this.x, this.y)) {
                 this.draw
                     .polygon(this.corners().map(({x, y}) => `${x},${y}`))
                     .fill('none')
                     .stroke({
-                        width: 1,
-                        color: '#999'
+                        width: STROKE_WIDTH,
+                        color: STROKE_COLOR
                     })
                     .translate(position.x, position.y)
+            }
 
-                // draw x and y coordinates
-                const x = this.x
-                const y = this.y
-                const index = toIndex(x, y)
-                const text = `${hive.charAt(index).toUpperCase()}`
+            // draw text
+            const text = getText(this.x, this.y)
+            if (text) {
                 this.draw
                     .text(text)
                     .font({
-                        size: fontSize,
+                        size: FONT_SIZE,
                         anchor: 'middle',
-                        leading: 1.4,
-                        fill: '#69c'
+                        leading: FONT_LEADING,
+                        fill: FONT_FILL
                     })
-                    .translate(centerPosition.x, centerPosition.y + fontSize/2)
+                    .translate(centerPosition.x, centerPosition.y + FONT_SIZE / 2)
             }
         }
     })
@@ -56,13 +50,7 @@ const initGrid = function(element, clickIndex) {
 
     element.addEventListener('click', ({ offsetX, offsetY }) => {
         const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
-        const x = hexCoordinates.x
-        const y = hexCoordinates.y
-        if (x < 0 || x > 2 || y < 0 | y > 2) {
-            return
-        }
-        const index = toIndex(x, y)
-        clickIndex(index)
+        clickIndex(hexCoordinates.x, hexCoordinates.y)
     })
 
     const draw = function(value) {
@@ -72,7 +60,7 @@ const initGrid = function(element, clickIndex) {
 
         Grid.rectangle({
             width: 3,      // value:	number (width in hexes)
-            height: 3,     // value:	number (height in hexes)
+            height: 5,     // value:	number (height in hexes)
             start: [0, 0], // value: 	any point
             direction: 0,  // value:	0, 1, 2, 3, 4 or 5
             onCreate: hex => {
