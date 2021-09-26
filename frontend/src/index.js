@@ -89,7 +89,6 @@ function init() {
                     state.word = '';
                 });
             }
-            document.getElementById('word').focus()
         }
 
         function onErase() {
@@ -132,6 +131,7 @@ function init() {
         event.preventDefault();
         Nocows.setWord(document.getElementById('word').value)
         Nocows.onCheck()
+        document.getElementById('word').focus()
     });
     document.getElementById('word').addEventListener('change', () => {
         Nocows.setWord(document.getElementById('word').value)

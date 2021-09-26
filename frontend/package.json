@@ -27,5 +27,9 @@
     "presets": [
       "@babel/preset-env"
     ]
+  },
+  "dependencies": {
+    "@svgdotjs/svg.js": "^3.1.1",
+    "honeycomb-grid": "^3.1.8"
   }
 }

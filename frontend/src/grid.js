@@ -1,5 +1,5 @@
-// import { extendHex, defineGrid } from 'honeycomb-grid'
-// import { SVG } from '@svgdotjs/svg.js'
+import { extendHex, defineGrid } from 'honeycomb-grid'
+import { SVG } from '@svgdotjs/svg.js'
 
 const size = 40
 const fontSize = 20
@@ -15,21 +15,17 @@ function toIndex(x, y) {
 
 const initGrid = function(element, clickIndex) {
 
-    console.log('initGrid', element)
-
-    const Hex = Honeycomb.extendHex({
+    const Hex = extendHex({
         size: size,
-        render(svg, hive) {
-            console.log('render', svg)
-
+        render(draw, hive) {
             const position = this.toPoint()
             const centerPosition = this.center().add(position)
 
-            this.svg = svg
+            this.draw = draw
 
             if (this.x > 0 || this.y === 1) {
                 // draw the hex
-                this.svg
+                this.draw
                     .polygon(this.corners().map(({x, y}) => `${x},${y}`))
                     .fill('none')
                     .stroke({
@@ -43,7 +39,7 @@ const initGrid = function(element, clickIndex) {
                 const y = this.y
                 const index = toIndex(x, y)
                 const text = `${hive.charAt(index).toUpperCase()}`
-                this.svg
+                this.draw
                     .text(text)
                     .font({
                         size: fontSize,
@@ -51,12 +47,12 @@ const initGrid = function(element, clickIndex) {
                         leading: 1.4,
                         fill: '#69c'
                     })
-                    .translate(centerPosition.x, centerPosition.y - fontSize)
+                    .translate(centerPosition.x, centerPosition.y + fontSize/2)
             }
         }
     })
 
-    const Grid = Honeycomb.defineGrid(Hex)
+    const Grid = defineGrid(Hex)
 
     element.addEventListener('click', ({ offsetX, offsetY }) => {
         const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
@@ -71,7 +67,7 @@ const initGrid = function(element, clickIndex) {
 
     const draw = function(value) {
         element.replaceChildren();
-        const svg = SVG(element)
+        const draw = SVG().addTo(element).size(300, 300)
         const hive = value
 
         Grid.rectangle({
@@ -80,7 +76,7 @@ const initGrid = function(element, clickIndex) {
             start: [0, 0], // value: 	any point
             direction: 0,  // value:	0, 1, 2, 3, 4 or 5
             onCreate: hex => {
-                hex.render(svg, hive)
+                hex.render(draw, hive)
             }
         })
     }
