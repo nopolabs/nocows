@@ -1,5 +1,6 @@
 frontend/dist/
 frontend/node_modules/
+src/main/resources/static/dist/bundle.js
 
 nopo.cc/
 HELP.md

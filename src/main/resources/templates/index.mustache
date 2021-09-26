@@ -5,9 +5,11 @@
           href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
           crossorigin="anonymous">
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.6.4/svg.min.js"></script>-->
+<!--    <script src="https://unpkg.com/honeycomb-grid"></script>-->
     <script src="dist/bundle.js"></script>
     <style>
-        #letter-0 { font-weight: bold; }
+        #grid { height: 210px }
     </style>
     <title>No Cows</title>
 </head>
@@ -15,23 +17,13 @@
 <div class="card">
     <div class="card-body">
         <h2 class="card-title">No Cows</h2>
+        <div id="grid"></div>
         <form id="form">
-            <div class="row mb-2 ml-5">
-                <input type="button" class="letter col-sm-1" id="letter-1" value=""/>
-                <input type="button" class="letter col-sm-1" id="letter-2" value=""/>
-            </div>
-            <div class="row mb-2 ml-3">
-                <input type="button" class="letter col-sm-1" id="letter-3" value=""/>
-                <input type="button" class="letter col-sm-1" id="letter-0" value=""/>
-                <input type="button" class="letter col-sm-1" id="letter-4" value=""/>
-            </div>
-            <div class="row mb-2 ml-5">
-                <input type="button" class="letter col-sm-1" id="letter-5" value=""/>
-                <input type="button" class="letter col-sm-1" id="letter-6" value=""/>
-            </div>
             <div class="row mb-2 ml-3">
                 <input type="button" id="check-button" value="Check"/>
+                &nbsp;
                 <input type="button" id="rotate-button" value="Rotate"/>
+                &nbsp;
                 <input type="button" id="erase-button" value="Erase"/>
             </div>
             <div class="row mb-2">
