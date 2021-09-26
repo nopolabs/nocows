@@ -1,9 +1,5 @@
-import { extendHex, defineGrid } from 'honeycomb-grid'
-import { SVG } from '@svgdotjs/svg.js'
-
-console.log('extendHex', extendHex)
-console.log('defineGrid', defineGrid)
-console.log('SVG', SVG)
+// import { extendHex, defineGrid } from 'honeycomb-grid'
+// import { SVG } from '@svgdotjs/svg.js'
 
 const size = 40
 const fontSize = 20
@@ -21,9 +17,7 @@ const initGrid = function(element, clickIndex) {
 
     console.log('initGrid', element)
 
-    const svg = SVG(element)
-
-    const Hex = extendHex({
+    const Hex = Honeycomb.extendHex({
         size: size,
         render(svg, hive) {
             console.log('render', svg)
@@ -62,7 +56,7 @@ const initGrid = function(element, clickIndex) {
         }
     })
 
-    const Grid = defineGrid(Hex)
+    const Grid = Honeycomb.defineGrid(Hex)
 
     element.addEventListener('click', ({ offsetX, offsetY }) => {
         const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
@@ -77,9 +71,8 @@ const initGrid = function(element, clickIndex) {
 
     const draw = function(value) {
         element.replaceChildren();
+        const svg = SVG(element)
         const hive = value
-
-        console.log('draw', svg)
 
         Grid.rectangle({
             width: 3,      // value:	number (width in hexes)

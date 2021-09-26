@@ -38,7 +38,16 @@ task buildFrontend(type: Exec) {
 	}
 }
 
-task installFrontend(type: Exec, dependsOn: 'buildFrontend') {
+task distDirectory(type: Exec, dependsOn: 'buildFrontend') {
+	workingDir "$projectDir"
+	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+		commandLine 'cmd', '/c', 'mkdir -p src/main/resources/static/dist/'
+	} else {
+		commandLine 'sh', '-c', 'mkdir -p src/main/resources/static/dist/'
+	}
+}
+
+task installFrontend(type: Exec, dependsOn: 'distDirectory') {
 	workingDir "$projectDir"
 	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
 		commandLine 'cmd', '/c', 'cp frontend/dist/bundle.js src/main/resources/static/dist/'
