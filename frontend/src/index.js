@@ -51,31 +51,39 @@ function isCheck(x, y) {
     return (y === 3 && x === 3)
 }
 
+class Observers {
+    add(prop, observer) {
+        if (!this.hasOwnProperty(prop)) {
+            this[prop] = []
+        }
+        this[prop].push(observer)
+    }
+
+    notify(prop, value) {
+        if (this.hasOwnProperty(prop)) {
+            this[prop].forEach(observer => observer(value))
+        }
+    }
+}
+
 function init() {
 
     const Nocows = function (gridElement) {
 
-        const handler = {
-            set: function(obj, prop, value) {
-                // console.log('set', prop, value)
-                obj[prop] = value;
-                switch (prop) {
-                    case 'hive':
-                    case 'word':
-                        drawHive()
-                        break
-                    case 'count':
-                        updateCount(value)
-                        break
-                    case 'total':
-                        updateTotal(value);
-                        break
-                    case 'spelled':
-                        updateSpelled(value)
-                        break
-                }
-                return true // success!
-            },
+        const observers = new Observers();
+        observers.add('hive', drawHive)
+        observers.add('word', drawHive)
+        observers.add('count', updateCount)
+        observers.add('total', updateTotal)
+        observers.add('spelled', updateSpelled)
+
+        function set(obj, prop, value) {
+            // console.log('set', prop, value, observers)
+            obj[prop] = value;
+
+            observers.notify(prop, value)
+
+            return true // success!
         }
 
         const state = new Proxy({
@@ -84,7 +92,9 @@ function init() {
             total: 0,
             word: '',
             spelled: new Set(),
-        }, handler)
+        }, {
+            set: set
+        })
 
         const grid = initGrid(GRID_WIDTH, GRID_HEIGHT, gridElement, clickIndex, getText, isHexVisible)
 
@@ -126,6 +136,7 @@ function init() {
         }
 
         function drawHive() {
+            // console.log('drawHive')
             grid.draw(state.hive)
         }
 
