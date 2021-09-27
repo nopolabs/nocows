@@ -8,7 +8,7 @@ const FONT_FILL = '#69c'
 const STROKE_WIDTH = 1
 const STROKE_COLOR = '#999'
 
-const initGrid = function(element, clickIndex, getText, isHexVisible) {
+const initGrid = function(width, height, element, clickIndex, getText, isHexVisible) {
 
     const Hex = extendHex({
         size: HEX_SIZE,
@@ -59,8 +59,8 @@ const initGrid = function(element, clickIndex, getText, isHexVisible) {
         const hive = value
 
         Grid.rectangle({
-            width: 3,      // value:	number (width in hexes)
-            height: 5,     // value:	number (height in hexes)
+            width: width,      // value:	number (width in hexes)
+            height: height,     // value:	number (height in hexes)
             start: [0, 0], // value: 	any point
             direction: 0,  // value:	0, 1, 2, 3, 4 or 5
             onCreate: hex => {
