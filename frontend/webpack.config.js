@@ -24,7 +24,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, './dist'),
-    filename: 'bundle.js',
+    filename: 'nocows.js',
   },
   watch: false, // require -- watch flag
   watchOptions: {

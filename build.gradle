@@ -31,29 +31,16 @@ test {
 
 task buildFrontend(type: Exec) {
 	workingDir "$projectDir/frontend"
-	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-		commandLine 'cmd', '/c', 'npm run dev'
-	} else {
-		commandLine 'sh', '-c', 'npm run dev'
-	}
+	commandLine 'sh', '-c', 'npm run dev'
 }
 
 task distDirectory(type: Exec, dependsOn: 'buildFrontend') {
 	workingDir "$projectDir"
-	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-		commandLine 'cmd', '/c', 'mkdir -p src/main/resources/static/dist/'
-	} else {
-		commandLine 'sh', '-c', 'mkdir -p src/main/resources/static/dist/'
-	}
+	commandLine 'sh', '-c', 'mkdir -p src/main/resources/static/dist/'
 }
 
 task installFrontend(type: Exec, dependsOn: 'distDirectory') {
-	workingDir "$projectDir"
-	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-		commandLine 'cmd', '/c', 'cp frontend/dist/bundle.js src/main/resources/static/dist/'
-	} else {
-		commandLine 'sh', '-c', 'cp frontend/dist/bundle.js src/main/resources/static/dist/'
-	}
+	commandLine 'sh', '-c', 'cp frontend/dist/nocows.js src/main/resources/static/dist/'
 }
 
 processResources.dependsOn 'installFrontend'
