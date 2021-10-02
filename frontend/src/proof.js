@@ -1,22 +1,18 @@
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-
-const crypto = window.crypto.subtle;
+import { createHash } from 'crypto';
 
 // SHA-256 hash of str, returns Uint8Array
 const sha256 = function(str) {
-    var buffer = new TextEncoder('utf-8').encode(str)
-    return crypto.digest('SHA-256', buffer);
+    return createHash('sha256')
+        .update(str, 'utf8')
+        .digest('hex')
 }
 
-const prove = async function(data) {
+const prove = function(data) {
     let nonce = 0;
     while(true) {
         const candidate = nonce + ':' + data;
-        const hash = await sha256(candidate);
-        const view = new DataView(hash);
-        const value = view.getUint16(0) & 0xFFF0; // first 12 bits
-        if (value === 0) {
+        const hash = sha256(candidate);
+        if (hash.startsWith('000')) {
             return candidate;
         }
         nonce++
