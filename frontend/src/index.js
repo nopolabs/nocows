@@ -137,7 +137,7 @@ function init() {
 
         function drawHive() {
             // console.log('drawHive')
-            grid.draw(state.hive)
+            grid.refresh()
         }
 
         function updateCount(value) {

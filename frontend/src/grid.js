@@ -10,17 +10,18 @@ const STROKE_COLOR = '#999'
 
 const initGrid = function(width, height, element, clickIndex, getText, isHexVisible) {
 
+    const draw = SVG().addTo(element).size(300, 300)
+
     const Hex = extendHex({
         size: HEX_SIZE,
-        render(draw, hive) {
+        render(draw) {
+            const border = isHexVisible(this.x, this.y)
+            const text = getText(this.x, this.y)
             const position = this.toPoint()
-            const centerPosition = this.center().add(position)
+            console.log("render", this, draw, border, text, position)
 
-            this.draw = draw
-
-            // draw the hex
-            if (isHexVisible(this.x, this.y)) {
-                this.draw
+            if (border) {
+                draw
                     .polygon(this.corners().map(({x, y}) => `${x},${y}`))
                     .fill('none')
                     .stroke({
@@ -30,10 +31,9 @@ const initGrid = function(width, height, element, clickIndex, getText, isHexVisi
                     .translate(position.x, position.y)
             }
 
-            // draw text
-            const text = getText(this.x, this.y)
             if (text) {
-                this.draw
+                const centerPosition = this.center().add(position)
+                draw
                     .text(text)
                     .font({
                         size: FONT_SIZE,
@@ -43,34 +43,38 @@ const initGrid = function(width, height, element, clickIndex, getText, isHexVisi
                     })
                     .translate(centerPosition.x, centerPosition.y + FONT_SIZE / 2)
             }
-        }
+        },
     })
 
     const Grid = defineGrid(Hex)
+    const grid = Grid.rectangle({
+        width: width,      // value:	number (width in hexes)
+        height: height,    // value:	number (height in hexes)
+        start: [0, 0],     // value: 	any point
+        direction: 0,      // value:	0, 1, 2, 3, 4 or 5
+        onCreate: hex => {
+            hex.render(draw)
+        }
+    })
 
     element.addEventListener('click', ({ offsetX, offsetY }) => {
         const hexCoordinates = Grid.pointToHex([offsetX, offsetY])
+        const hex = grid.get(hexCoordinates)
+        console.log(offsetX, offsetY, hexCoordinates, hex)
         clickIndex(hexCoordinates.x, hexCoordinates.y)
+
     })
 
-    const draw = function(value) {
-        element.replaceChildren();
-        const draw = SVG().addTo(element).size(300, 300)
-        const hive = value
-
-        Grid.rectangle({
-            width: width,      // value:	number (width in hexes)
-            height: height,     // value:	number (height in hexes)
-            start: [0, 0], // value: 	any point
-            direction: 0,  // value:	0, 1, 2, 3, 4 or 5
-            onCreate: hex => {
-                hex.render(draw, hive)
-            }
+    const refresh = () => {
+        console.log("refresh")
+        draw.clear()
+        grid.forEach((hex) => {
+            hex.render(draw)
         })
     }
 
     return {
-        draw: draw
+        refresh
     }
 }
 
