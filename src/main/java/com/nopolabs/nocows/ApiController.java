@@ -169,7 +169,6 @@ public class ApiController {
         if (proof == null) {
             throw new IllegalArgumentException();
         }
-//        LOG.info("proof = [" + proof + "]");
 
         // nonce:token:data
         String[] parts = proof.split(":", 3);
