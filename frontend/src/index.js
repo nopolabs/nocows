@@ -68,10 +68,11 @@ class Observers {
 
 function init() {
 
-    document.addEventListener('keyup', event => {
+    document.addEventListener('keydown', event => {
         if (event.isComposing || event.keyCode === 229) {
             return;
         }
+        event.preventDefault();
         switch (event.key) {
             case 'Backspace': eraseLast(); break
             case 'Enter': checkWord(); break
@@ -84,6 +85,16 @@ function init() {
             }
         }
     })
+
+    // document.addEventListener('keypress', event => {
+    //     event.preventDefault();
+    //     console.log('keypress', event.key)
+    // })
+    //
+    // document.addEventListener('keyup', event => {
+    //     event.preventDefault();
+    //     console.log('keyup', event.key)
+    // })
 
     document.getElementById('solution-button').onclick = onSolution
 
