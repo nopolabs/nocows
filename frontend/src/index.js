@@ -68,140 +68,156 @@ class Observers {
 
 function init() {
 
-    const Nocows = function (gridElement) {
-
-        const observers = new Observers();
-        observers.add('hive', drawHive)
-        observers.add('word', drawHive)
-        observers.add('count', updateCount)
-        observers.add('total', updateTotal)
-        observers.add('spelled', updateSpelled)
-
-        function set(obj, prop, value) {
-            // console.log('set', prop, value, observers)
-            obj[prop] = value;
-
-            observers.notify(prop, value)
-
-            return true // success!
+    document.addEventListener('keyup', event => {
+        if (event.isComposing || event.keyCode === 229) {
+            return;
         }
-
-        const state = new Proxy({
-            hive: '',
-            count: 0,
-            total: 0,
-            word: '',
-            spelled: new Set(),
-        }, {
-            set: set
-        })
-
-        const grid = initGrid(GRID_WIDTH, GRID_HEIGHT, gridElement, clickIndex, getText, isHexVisible)
-
-        function isHexVisible(x, y) {
-            return toHexVisible(x, y)
-        }
-
-        function getText(x, y) {
-            // console.log('getText', x, y)
-            if (isRotate(x, y)) {
-                return ROTATE_SYMBOL
-            }
-            if (isErase(x, y)) {
-                return ERASE_SYMBOL
-            }
-            if (isCheck(x, y)) {
-                return CHECK_SYMBOL
-            }
-            if (y === 4 && x === 2) {
-                return state.word
-            }
-            const index = toTextIndex(x, y)
-            return state.hive.charAt(index).toUpperCase()
-        }
-
-        function clickIndex(x, y) {
-            if (isRotate(x, y)) {
-                rotateHive()
-            } else if (isErase(x, y)) {
-                eraseLast()
-            } else if (isCheck(x, y)) {
-                checkWord()
-            } else {
-                const index = toTextIndex(x, y)
-                if (index >= 0) {
-                    state.word = state.word + state.hive.charAt(index)
+        switch (event.key) {
+            case 'Backspace': eraseLast(); break
+            case 'Enter': checkWord(); break
+            case 'Tab': rotateHive(); break
+            case 'Escape': onSolution(); break
+            default: {
+                if (state.hive.includes(event.key)) {
+                    addToWord(event.key)
                 }
             }
         }
+    })
 
-        function drawHive() {
-            // console.log('drawHive')
-            grid.refresh()
+    document.getElementById('solution-button').onclick = onSolution
+
+    const observers = new Observers();
+    observers.add('hive', drawHive)
+    observers.add('word', drawHive)
+    observers.add('count', updateCount)
+    observers.add('total', updateTotal)
+    observers.add('spelled', updateSpelled)
+
+    function set(obj, prop, value) {
+        // console.log('set', prop, value, observers)
+        obj[prop] = value;
+
+        observers.notify(prop, value)
+
+        return true // success!
+    }
+
+    const state = new Proxy({
+        hive: '',
+        count: 0,
+        total: 0,
+        word: '',
+        spelled: new Set(),
+    }, {
+        set: set
+    })
+
+    const gridElement = document.getElementById('grid')
+
+    const grid = initGrid(GRID_WIDTH, GRID_HEIGHT, gridElement, clickIndex, getText, isHexVisible)
+
+    function isHexVisible(x, y) {
+        return toHexVisible(x, y)
+    }
+
+    function getText(x, y) {
+        // console.log('getText', x, y)
+        if (isRotate(x, y)) {
+            return ROTATE_SYMBOL
         }
-
-        function updateCount(value) {
-            // console.log('updateCount', value, state.count)
-            document.getElementById('count').innerText = value
+        if (isErase(x, y)) {
+            return ERASE_SYMBOL
         }
-
-        function updateTotal(value) {
-            // console.log('updateTotal', value, state.total)
-            document.getElementById('total').innerText = value
+        if (isCheck(x, y)) {
+            return CHECK_SYMBOL
         }
-
-        function updateSpelled(value) {
-            // console.log('updateSpelled', value, state.spelled)
-            document.getElementById('score').innerText = score(value, state.hive)
-            document.getElementById('words').innerHTML = words(value, state.hive)
-            state.count = value.size
+        if (y === 4 && x === 2) {
+            return state.word
         }
+        const index = toTextIndex(x, y)
+        return state.hive.charAt(index).toUpperCase()
+    }
 
-        function onSolution() {
-            solve(state.hive, json => {
+    function addToWord(char) {
+        state.word = state.word + char
+    }
+
+    function clickIndex(x, y) {
+        if (isRotate(x, y)) {
+            rotateHive()
+        } else if (isErase(x, y)) {
+            eraseLast()
+        } else if (isCheck(x, y)) {
+            checkWord()
+        } else {
+            const index = toTextIndex(x, y)
+            if (index >= 0) {
+                addToWord(state.hive.charAt(index))
+            }
+        }
+    }
+
+    function drawHive() {
+        // console.log('drawHive')
+        grid.refresh()
+    }
+
+    function updateCount(value) {
+        // console.log('updateCount', value, state.count)
+        document.getElementById('count').innerText = value
+    }
+
+    function updateTotal(value) {
+        // console.log('updateTotal', value, state.total)
+        document.getElementById('total').innerText = value
+    }
+
+    function updateSpelled(value) {
+        // console.log('updateSpelled', value, state.spelled)
+        document.getElementById('score').innerText = score(value, state.hive)
+        document.getElementById('words').innerHTML = words(value, state.hive)
+        state.count = value.size
+    }
+
+    function onSolution() {
+        solve(state.hive, json => {
+            const spelled = state.spelled
+            json.words.forEach(word => {
+                spelled.add(capitalize(word))
+            })
+            state.spelled = spelled
+            state.word = ''
+        })
+    }
+
+    function checkWord() {
+        if (state.word.length > 0) {
+            check(state.hive, state.word, json => {
                 const spelled = state.spelled
-                json.words.forEach(word => {
-                    spelled.add(capitalize(word))
-                })
-                state.spelled = spelled
+                if (json.found) {
+                    spelled.add(capitalize(json.word))
+                    state.spelled = spelled
+                }
                 state.word = ''
             })
         }
+    }
 
-        function checkWord() {
-            if (state.word.length > 0) {
-                check(state.hive, state.word, json => {
-                    const spelled = state.spelled
-                    if (json.found) {
-                        spelled.add(capitalize(json.word))
-                        state.spelled = spelled
-                    }
-                    state.word = ''
-                })
-            }
-        }
+    function eraseLast() {
+        state.word = state.word.slice(0, -1)
+    }
 
-        function eraseLast() {
-            state.word = state.word.slice(0, -1)
-        }
+    function rotateHive() {
+        const hive = state.hive
+        state.hive = hive.charAt(0) + shuffle(hive.substring(1))
+    }
 
-        function rotateHive() {
-            const hive = state.hive
-            state.hive = hive.charAt(0) + shuffle(hive.substring(1))
-        }
-
-        getHive(json => {
-            // console.log(json)
-            state.hive = json.hive
-            state.total = json.total
-        })
-
-        return {
-            onSolution: onSolution
-        }
-    }(document.getElementById('grid'))
-
-    document.getElementById('solution-button').onclick = Nocows.onSolution
+    getHive(json => {
+        // console.log(json)
+        state.hive = json.hive
+        state.total = json.total
+    })
 }
 
 document.addEventListener('DOMContentLoaded', init)
