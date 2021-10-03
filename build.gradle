@@ -31,7 +31,7 @@ test {
 
 task buildFrontend(type: Exec) {
 	workingDir "$projectDir/frontend"
-	commandLine 'sh', '-c', 'npm run dev'
+	commandLine 'sh', '-c', 'npm i && npm run dev'
 }
 
 task distDirectory(type: Exec, dependsOn: 'buildFrontend') {
