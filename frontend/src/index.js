@@ -1,7 +1,7 @@
-import { getHive, solve, check } from './api';
-import { score, words, capitalize } from './bee';
-import { shuffle } from './shuffle';
-import { initGrid } from './grid';
+import { getHive, solve, check } from './api'
+import { score, words, capitalize } from './bee'
+import { shuffle } from './shuffle'
+import { initGrid } from './grid'
 
 const ROTATE_SYMBOL = String.fromCodePoint(0x1F504) // 🔄
 const ERASE_SYMBOL = String.fromCodePoint(0x2B05)   // ⬅
@@ -79,7 +79,7 @@ function init() {
         set: set
     })
 
-    const observers = new Observers();
+    const observers = new Observers()
     observers.add('hive', drawHive)
     observers.add('word', drawHive)
     observers.add('count', updateCount)
@@ -88,7 +88,7 @@ function init() {
     observers.add('solution', updateSolution)
 
     function set(obj, prop, value) {
-        obj[prop] = value;
+        obj[prop] = value
         observers.notify(prop, value)
         return true // success!
     }
@@ -98,7 +98,7 @@ function init() {
     const grid = initGrid(GRID_WIDTH, GRID_HEIGHT, gridElement, getText, isHexVisible)
 
     gridElement.addEventListener('click', (event) => {
-        event.preventDefault();
+        event.preventDefault()
         const { x, y } = grid.clickToHex(event)
         if (isRotate(x, y)) { rotateHive() }
         else if (isErase(x, y)) { eraseLast() }
@@ -113,9 +113,9 @@ function init() {
 
     document.addEventListener('keydown', event => {
         if (event.isComposing || event.keyCode === 229) {
-            return;
+            return
         }
-        event.preventDefault();
+        event.preventDefault()
         switch (event.key) {
             case 'Backspace': eraseLast(); break
             case 'Enter': checkWord(); break
