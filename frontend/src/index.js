@@ -68,6 +68,49 @@ class Observers {
 
 function init() {
 
+    const state = new Proxy({
+        hive: '',
+        count: 0,
+        total: 0,
+        word: '',
+        spelled: new Set(),
+        solution: new Set(),
+    }, {
+        set: set
+    })
+
+    const observers = new Observers();
+    observers.add('hive', drawHive)
+    observers.add('word', drawHive)
+    observers.add('count', updateCount)
+    observers.add('total', updateTotal)
+    observers.add('spelled', updateSpelled)
+    observers.add('solution', updateSolution)
+
+    function set(obj, prop, value) {
+        obj[prop] = value;
+        observers.notify(prop, value)
+        return true // success!
+    }
+
+    const gridElement = document.getElementById('grid')
+
+    const grid = initGrid(GRID_WIDTH, GRID_HEIGHT, gridElement, getText, isHexVisible)
+
+    gridElement.addEventListener('click', (event) => {
+        event.preventDefault();
+        const { x, y } = grid.clickToHex(event)
+        if (isRotate(x, y)) { rotateHive() }
+        else if (isErase(x, y)) { eraseLast() }
+        else if (isCheck(x, y)) { checkWord() }
+        else {
+            const index = toTextIndex(x, y)
+            if (index >= 0) {
+                addToWord(state.hive.charAt(index))
+            }
+        }
+    })
+
     document.addEventListener('keydown', event => {
         if (event.isComposing || event.keyCode === 229) {
             return;
@@ -77,7 +120,7 @@ function init() {
             case 'Backspace': eraseLast(); break
             case 'Enter': checkWord(); break
             case 'Tab': rotateHive(); break
-            case 'Escape': onSolution(); break
+            case 'Escape': getSolution(); break
             default: {
                 if (state.hive.includes(event.key)) {
                     addToWord(event.key)
@@ -86,47 +129,7 @@ function init() {
         }
     })
 
-    // document.addEventListener('keypress', event => {
-    //     event.preventDefault();
-    //     console.log('keypress', event.key)
-    // })
-    //
-    // document.addEventListener('keyup', event => {
-    //     event.preventDefault();
-    //     console.log('keyup', event.key)
-    // })
-
-    document.getElementById('solution-button').onclick = onSolution
-
-    const observers = new Observers();
-    observers.add('hive', drawHive)
-    observers.add('word', drawHive)
-    observers.add('count', updateCount)
-    observers.add('total', updateTotal)
-    observers.add('spelled', updateSpelled)
-
-    function set(obj, prop, value) {
-        // console.log('set', prop, value, observers)
-        obj[prop] = value;
-
-        observers.notify(prop, value)
-
-        return true // success!
-    }
-
-    const state = new Proxy({
-        hive: '',
-        count: 0,
-        total: 0,
-        word: '',
-        spelled: new Set(),
-    }, {
-        set: set
-    })
-
-    const gridElement = document.getElementById('grid')
-
-    const grid = initGrid(GRID_WIDTH, GRID_HEIGHT, gridElement, clickIndex, getText, isHexVisible)
+    document.getElementById('solution-button').addEventListener('click', getSolution)
 
     function isHexVisible(x, y) {
         return toHexVisible(x, y)
@@ -154,21 +157,6 @@ function init() {
         state.word = state.word + char
     }
 
-    function clickIndex(x, y) {
-        if (isRotate(x, y)) {
-            rotateHive()
-        } else if (isErase(x, y)) {
-            eraseLast()
-        } else if (isCheck(x, y)) {
-            checkWord()
-        } else {
-            const index = toTextIndex(x, y)
-            if (index >= 0) {
-                addToWord(state.hive.charAt(index))
-            }
-        }
-    }
-
     function drawHive() {
         // console.log('drawHive')
         grid.refresh()
@@ -191,13 +179,18 @@ function init() {
         state.count = value.size
     }
 
-    function onSolution() {
+    function updateSolution() {
+        document.getElementById('solution').innerHTML = words(state.solution, state.hive)
+        grid.refresh()
+    }
+
+    function getSolution() {
         solve(state.hive, json => {
-            const spelled = state.spelled
+            const solution = state.solution
             json.words.forEach(word => {
-                spelled.add(capitalize(word))
+                solution.add(capitalize(word))
             })
-            state.spelled = spelled
+            state.solution = solution
             state.word = ''
         })
     }

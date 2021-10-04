@@ -8,7 +8,7 @@ const FONT_FILL = '#69c'
 const STROKE_WIDTH = 2
 const STROKE_COLOR = '#999'
 
-const initGrid = function(width, height, element, clickIndex, getText, isHexVisible) {
+const initGrid = function(width, height, element, getText, isHexVisible) {
 
     const draw = SVG().addTo(element).size(320, 320)
 
@@ -59,13 +59,11 @@ const initGrid = function(width, height, element, clickIndex, getText, isHexVisi
 
     console.log('grid', grid)
 
-    element.addEventListener('click', (event) => {
-        const { clientX, clientY, offsetX, offsetY } = event
-        const hexCoordinates = Grid.pointToHex([clientX, clientY])
-        const hex = grid.get(hexCoordinates)
-        // console.log("click", clientX, clientY, offsetX, offsetY, event)
-        clickIndex(hexCoordinates.x, hexCoordinates.y)
-    })
+    const clickToHex = (event) => {
+        const { clientX, clientY } = event
+        const { x, y } = Grid.pointToHex([clientX, clientY])
+        return { x, y }
+    }
 
     const refresh = () => {
         draw.clear()
@@ -75,6 +73,7 @@ const initGrid = function(width, height, element, clickIndex, getText, isHexVisi
     }
 
     return {
+        clickToHex,
         refresh
     }
 }
