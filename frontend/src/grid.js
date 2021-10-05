@@ -58,8 +58,8 @@ function initGrid(width, height, element, getText, isHexVisible) {
     })
 
     function clickToHex(event) {
-        const { clientX, clientY } = event
-        const { x, y } = Grid.pointToHex([clientX, clientY])
+        const { offsetX, offsetY } = event
+        const { x, y } = Grid.pointToHex([offsetX, offsetY])
         return { x, y }
     }
 
