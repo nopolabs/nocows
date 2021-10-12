@@ -2,6 +2,7 @@ import { getHive, solve, check } from './api'
 import { score, words, capitalize } from './bee'
 import { shuffle } from './shuffle'
 import { initGrid } from './grid'
+import { BloomFilter } from './bloomfilter'
 
 const ROTATE_SYMBOL = String.fromCodePoint(0x1F504) // 🔄
 const ERASE_SYMBOL = String.fromCodePoint(0x2B05)   // ⬅
@@ -75,6 +76,7 @@ function init() {
         word: '',
         spelled: new Set(),
         solution: new Set(),
+        bloomFilter: null,
     }, {
         set: set
     })
@@ -197,9 +199,12 @@ function init() {
 
     function checkWord() {
         if (state.word.length > 0) {
+
+            console.log(state.word, state.bloomFilter.test(state.word), state.bloomFilter.m, state.bloomFilter.k)
+
             check(state.hive, state.word, json => {
-                const spelled = state.spelled
                 if (json.found) {
+                    const spelled = state.spelled
                     spelled.add(capitalize(json.word))
                     state.spelled = spelled
                 }
@@ -218,9 +223,12 @@ function init() {
     }
 
     getHive(json => {
-        // console.log(json)
+        console.log(json)
         state.hive = json.hive
         state.total = json.total
+        const bloomFilter = new BloomFilter(json.nBits, json.nHash)
+        bloomFilter.fromBase64(json.bloomFilter)
+        state.bloomFilter = bloomFilter
     })
 }
 
