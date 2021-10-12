@@ -65,8 +65,6 @@ public class Bee {
     }
 
     private BloomFilter buildBloom(List<String> words) {
-//        BloomFilter bloomFilter = new BloomFilter(32, 10);
-//        bloomFilter.add(words.get(0));
         BloomFilter bloomFilter = new BloomFilter(125 * 32, 10);
         words.forEach(bloomFilter::add);
         return bloomFilter;
