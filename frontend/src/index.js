@@ -1,4 +1,4 @@
-import { getHive, solve, check } from './api'
+import { getHive, solve } from './api'
 import { score, words, capitalize } from './bee'
 import { shuffle } from './shuffle'
 import { initGrid } from './grid'
@@ -205,15 +205,6 @@ function init() {
                 state.spelled = spelled
             }
             state.word = ''
-
-            // check(state.hive, state.word, json => {
-            //     if (json.found) {
-            //         const spelled = state.spelled
-            //         spelled.add(capitalize(json.word))
-            //         state.spelled = spelled
-            //     }
-            //     state.word = ''
-            // })
         }
     }
 

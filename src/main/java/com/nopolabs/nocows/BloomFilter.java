@@ -31,13 +31,6 @@ public class BloomFilter {
         this.buckets = buckets;
     }
 
-//    public Bloomfilter(String hex, int numHash) {
-//        this.nBuckets = buckets.length;
-//        this.nBits = nBuckets * 32;
-//        this.nHash = numHash;
-//        this.buckets = buckets;
-//    }
-
     public int getNBits() {
         return nBits;
     }
@@ -100,7 +93,7 @@ public class BloomFilter {
         int x = a % nBits;
         for (int i = 0; i < nHash; ++i) {
             r[i] = x < 0 ? (x + nBits) : x;
-            x = (x + b) % nBits; //Integer.remainderUnsigned((x + b), nBits);
+            x = (x + b) % nBits;
         }
         return r;
     }
