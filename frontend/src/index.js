@@ -199,17 +199,21 @@ function init() {
 
     function checkWord() {
         if (state.word.length > 0) {
+            if (state.bloomFilter.test(state.word)) {
+                const spelled = state.spelled
+                spelled.add(capitalize(state.word))
+                state.spelled = spelled
+            }
+            state.word = ''
 
-            console.log(state.word, state.bloomFilter.test(state.word), state.bloomFilter.m, state.bloomFilter.k)
-
-            check(state.hive, state.word, json => {
-                if (json.found) {
-                    const spelled = state.spelled
-                    spelled.add(capitalize(json.word))
-                    state.spelled = spelled
-                }
-                state.word = ''
-            })
+            // check(state.hive, state.word, json => {
+            //     if (json.found) {
+            //         const spelled = state.spelled
+            //         spelled.add(capitalize(json.word))
+            //         state.spelled = spelled
+            //     }
+            //     state.word = ''
+            // })
         }
     }
 
