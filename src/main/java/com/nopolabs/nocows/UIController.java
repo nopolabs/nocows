@@ -11,6 +11,11 @@ public class UIController {
     UIController() {
     }
 
+    @GetMapping("/solve")
+    public String solve() {
+        return "solve";
+    }
+
     @GetMapping
     public String get() {
         return "index";

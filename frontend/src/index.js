@@ -67,7 +67,8 @@ class Observers {
     }
 }
 
-function init() {
+function initIndex() {
+    console.log('initIndex')
 
     const state = new Proxy({
         hive: '',
@@ -225,6 +226,30 @@ function init() {
         bloomFilter.fromBase64(json.bloomFilter)
         state.bloomFilter = bloomFilter
     })
+}
+
+function initSolve() {
+    console.log('initSolve')
+    function getSolution() {
+        const hive = document.getElementById('hive').value.toLowerCase()
+        solve(hive, json => {
+            const solution = new Set()
+            json.words.forEach(word => {
+                solution.add(capitalize(word))
+            })
+            document.getElementById('solution').innerHTML = words(solution, hive, "<br/>")
+        })
+    }
+    document.getElementById('solve-button').addEventListener('click', getSolution)
+}
+
+function init() {
+    if (document.getElementById('index-body')) {
+        initIndex()
+    }
+    if (document.getElementById('solve-body')) {
+        initSolve()
+    }
 }
 
 document.addEventListener('DOMContentLoaded', init)

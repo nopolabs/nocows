@@ -26,11 +26,11 @@ function score(words, hive) {
     }, 0)
 }
 
-function words(spelled, hive) {
+function words(spelled, hive, separator = ' ') {
     return Array.from(spelled)
         .sort()
         .map(word => isPangram(word, hive) ? ("<b>" + word + "</b>") : word)
-        .join(" ")
+        .join(separator)
 }
 
 function capitalize(word) {
